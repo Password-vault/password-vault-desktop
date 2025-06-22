@@ -35,6 +35,16 @@ A secure, modern desktop password manager built with **Electron**. This is a sta
 - **Fast encryption** - Optimized encryption/decryption algorithms
 - **Efficient database** - SQLite with proper indexing
 
+## 📸 Screenshots
+
+### Login Page
+![Login Page](Picture/login-page.png)
+*Secure login interface with modern design and gradient background*
+
+### Home Dashboard
+![Home Dashboard](Picture/home-dashboard.png)
+*Main password management interface with search, categories, and secure storage*
+
 ## 🚀 Quick Start
 
 ### Automated Installation
