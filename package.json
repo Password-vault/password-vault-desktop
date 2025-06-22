@@ -1,0 +1,208 @@
+{
+  "name": "password-vault-desktop",
+  "version": "1.0.0",
+  "description": "A secure desktop password manager built with Electron - optimized for low memory usage with professional UI",
+  "main": "electron/main.js",
+  "scripts": {
+    "start": "electron . --disable-gpu-sandbox --max-old-space-size=512",
+    "auto-build": "./build-and-run.sh",
+    "start-lowmem": "./node_modules/.bin/electron . --disable-gpu-sandbox --disable-software-rasterizer --disable-background-timer-throttling --disable-backgrounding-occluded-windows --disable-renderer-backgrounding --disable-features=TranslateUI,VizDisplayCompositor --disable-ipc-flooding-protection --memory-pressure-off --max-old-space-size=256 --no-sandbox --disable-dev-shm-usage --disable-extensions --disable-plugins --disable-web-security --single-process",
+    "start-ultra-lowmem": "./node_modules/.bin/electron . --disable-gpu --disable-software-rasterizer --disable-dev-shm-usage --disable-extensions --disable-plugins --disable-web-security --no-sandbox --disable-features=VizDisplayCompositor,TranslateUI,AudioServiceOutOfProcess,MediaSession,PlatformNotifications --single-process --memory-pressure-off --max-old-space-size=192 --disable-background-timer-throttling --disable-backgrounding-occluded-windows --disable-renderer-backgrounding --disable-ipc-flooding-protection --js-flags=\"--max-old-space-size=192 --max-semi-space-size=16 --optimize-for-size\"",
+    "start-pi": "./node_modules/.bin/electron . --disable-gpu --disable-software-rasterizer --disable-dev-shm-usage --disable-extensions --disable-plugins --disable-web-security --no-sandbox --disable-features=VizDisplayCompositor --single-process",
+    "test": "node test_runner.js",
+    "test-suite": "node test_suite.js",
+    "dev": "electron . --enable-logging --disable-gpu-sandbox",
+    "build": "electron-builder",
+    "build-win": "electron-builder --win",
+    "build-mac": "electron-builder --mac",
+    "build-linux": "electron-builder --linux",
+    "build-all": "electron-builder --win --mac --linux",
+    "dist": "electron-builder --publish=never",
+    "dist-win": "electron-builder --win --publish=never",
+    "dist-mac": "electron-builder --mac --publish=never",
+    "dist-linux": "electron-builder --linux --publish=never",
+    "pack": "electron-builder --dir",
+    "release": "electron-builder --publish=always",
+    "postinstall": "electron-builder install-app-deps"
+  },
+  "keywords": [
+    "password",
+    "manager",
+    "security",
+    "electron",
+    "desktop"
+  ],
+  "author": "Password Vault Team",
+  "license": "MIT",
+  "dependencies": {
+    "bcrypt": "^5.1.1",
+    "sqlite3": "^5.1.6"
+  },
+  "devDependencies": {
+    "@electron/rebuild": "^4.0.1",
+    "electron": "^28.0.0",
+    "electron-builder": "^24.6.4",
+    "electron-rebuild": "^3.2.9"
+  },
+  "build": {
+    "appId": "com.passwordvault.desktop",
+    "productName": "Password Vault",
+    "copyright": "Copyright © 2024 Password Vault Team",
+    "directories": {
+      "output": "dist",
+      "buildResources": "build"
+    },
+    "files": [
+      "electron/**/*",
+      "memory-config.js",
+      "package.json",
+      "!**/{.DS_Store,.git,.gitignore,.gitmodules}",
+      "!**/{CVS,RCS,SCCS,.hg,.svn}",
+      "!**/{__pycache__,*.pyc,*.pyo,*.pyd}",
+      "!**/node_modules/.cache",
+      "!**/npm-debug.log*",
+      "!**/.nyc_output",
+      "!**/test/**",
+      "!**/*.test.js"
+    ],
+    "extraMetadata": {
+      "main": "electron/main.js"
+    },
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64",
+            "ia32"
+          ]
+        },
+        {
+          "target": "portable",
+          "arch": [
+            "x64"
+          ]
+        },
+        {
+          "target": "zip",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "requestedExecutionLevel": "asInvoker",
+      "publisherName": "Password Vault Team"
+    },
+    "mac": {
+      "target": [
+        {
+          "target": "dmg",
+          "arch": [
+            "x64",
+            "arm64"
+          ]
+        },
+        {
+          "target": "zip",
+          "arch": [
+            "x64",
+            "arm64"
+          ]
+        }
+      ],
+      "category": "public.app-category.productivity",
+      "hardenedRuntime": true,
+      "entitlements": "build/entitlements.mac.plist",
+      "entitlementsInherit": "build/entitlements.mac.plist"
+    },
+    "linux": {
+      "target": [
+        {
+          "target": "AppImage",
+          "arch": [
+            "x64"
+          ]
+        },
+        {
+          "target": "deb",
+          "arch": [
+            "x64"
+          ]
+        },
+        {
+          "target": "rpm",
+          "arch": [
+            "x64"
+          ]
+        },
+        {
+          "target": "tar.gz",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "category": "Utility",
+      "synopsis": "Secure Password Manager",
+      "description": "A secure desktop password manager with advanced encryption and memory optimization",
+      "desktop": {
+        "Name": "Password Vault",
+        "Comment": "Secure Password Manager",
+        "Keywords": "password;security;manager;vault;encryption;"
+      }
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "deleteAppDataOnUninstall": false,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Password Vault",
+      "include": "build/installer.nsh"
+    },
+    "dmg": {
+      "title": "Password Vault Installer",
+      "backgroundColor": "#667eea",
+      "window": {
+        "width": 600,
+        "height": 400
+      },
+      "contents": [
+        {
+          "x": 150,
+          "y": 200,
+          "type": "file"
+        },
+        {
+          "x": 450,
+          "y": 200,
+          "type": "link",
+          "path": "/Applications"
+        }
+      ]
+    },
+    "deb": {
+      "priority": "optional",
+      "depends": [
+        "libgtk-3-0",
+        "libxss1",
+        "libxrandr2",
+        "libasound2",
+        "libpangocairo-1.0-0",
+        "libatk1.0-0",
+        "libcairo-gobject2",
+        "libgtk-3-0",
+        "libgdk-pixbuf2.0-0"
+      ]
+    },
+    "rpm": {
+      "depends": [
+        "gtk3",
+        "libXScrnSaver",
+        "libXrandr",
+        "alsa-lib"
+      ]
+    }
+  }
+}

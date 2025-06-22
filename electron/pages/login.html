@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Password Vault - Login</title>
+    <!-- Lightweight styles instead of heavy external dependencies -->
+    <style>
+        /* Minimal CSS for login page - optimized for memory usage */
+        *, *::before, *::after { 
+            box-sizing: border-box; 
+            margin: 0; 
+            padding: 0;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .login-container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 3rem;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 450px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .logo {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        
+        .logo-icon {
+            font-size: 4rem;
+            color: #667eea;
+            margin-bottom: 1rem;
+            display: block;
+        }
+        
+        .logo h2 {
+            color: #333;
+            font-weight: 600;
+            margin: 0;
+            font-size: 1.8rem;
+        }
+        
+        .logo p {
+            color: #666;
+            margin: 0.5rem 0 0 0;
+            font-size: 0.9rem;
+        }
+        
+        .form-group {
+            margin-bottom: 1.5rem;
+            position: relative;
+        }
+        
+        .form-control {
+            width: 100%;
+            border: 2px solid #e9ecef;
+            border-radius: 12px;
+            padding: 1rem;
+            font-size: 1rem;
+            transition: all 0.2s ease;
+            background: white;
+        }
+        
+        .form-control:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+            outline: none;
+        }
+        
+        .form-label {
+            position: absolute;
+            top: 1rem;
+            left: 1rem;
+            color: #6c757d;
+            pointer-events: none;
+            transition: all 0.2s ease;
+            background: white;
+            padding: 0 0.25rem;
+        }
+        
+        .form-control:focus + .form-label,
+        .form-control:not(:placeholder-shown) + .form-label {
+            top: -0.5rem;
+            left: 0.75rem;
+            font-size: 0.8rem;
+            color: #667eea;
+        }
+        
+        .btn {
+            border: none;
+            border-radius: 12px;
+            padding: 1rem;
+            font-size: 1rem;
+            font-weight: 600;
+            width: 100%;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+            transition: all 0.2s ease;
+            margin-bottom: 1rem;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+        
+        .btn-outline-secondary {
+            background: transparent;
+            border: 2px solid #6c757d;
+            color: #6c757d;
+        }
+        
+        .btn-outline-secondary:hover {
+            background-color: #6c757d;
+            color: white;
+            transform: translateY(-1px);
+        }
+        
+        .alert {
+            padding: 1rem;
+            border-radius: 12px;
+            margin-bottom: 1.5rem;
+            border: none;
+        }
+        
+        .alert-danger {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        
+        .alert-success {
+            background-color: #d1e7dd;
+            color: #0f5132;
+        }
+        
+        .text-center {
+            text-align: center;
+        }
+        
+        .text-center a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        
+        .text-center a:hover {
+            text-decoration: underline;
+        }
+        
+        .divider {
+            text-align: center;
+            margin: 1.5rem 0;
+            position: relative;
+        }
+        
+        .divider::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: #dee2e6;
+        }
+        
+        .divider span {
+            background: white;
+            padding: 0 1rem;
+            color: #6c757d;
+            font-size: 0.9rem;
+        }
+        
+        .password-strength {
+            margin-top: 0.5rem;
+            font-size: 0.8rem;
+        }
+        
+        .strength-weak { color: #dc3545; }
+        .strength-medium { color: #ffc107; }
+        .strength-strong { color: #28a745; }
+        
+        /* Icons using Unicode characters */
+        .icon-shield::before { content: '🔒'; }
+        .icon-user::before { content: '👤'; }
+        .icon-lock::before { content: '🔐'; }
+        .icon-eye::before { content: '👁️'; }
+        .icon-eye-slash::before { content: '🙈'; }
+        
+        /* Performance optimizations */
+        * { 
+            will-change: auto;
+            animation-duration: 0.1s;
+            transition-duration: 0.1s;
+        }
+        
+        /* Responsive design */
+        @media (max-width: 480px) {
+            .login-container {
+                padding: 2rem 1.5rem;
+                margin: 1rem;
+            }
+            
+            .logo-icon {
+                font-size: 3rem;
+            }
+            
+            .logo h2 {
+                font-size: 1.5rem;
+            }
+        }
+        
+        /* Loading state */
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        
+        .loading::after {
+            content: '...';
+            animation: dots 1s infinite;
+        }
+        
+        @keyframes dots {
+            0%, 20% { content: '.'; }
+            40% { content: '..'; }
+            60%, 100% { content: '...'; }
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="logo">
+            <span class="logo-icon">🔒</span>
+            <h2>Password Vault</h2>
+            <p>Secure Desktop Password Manager</p>
+        </div>
+        
+        <div id="alertContainer"></div>
+        
+        <div id="loginForm">
+            <form id="loginFormElement">
+                <div class="form-group">
+                    <input type="text" class="form-control" id="username" placeholder=" " required>
+                    <label for="username" class="form-label">
+                        <span class="icon-user"></span> Username or Email
+                    </label>
+                </div>
+                
+                <div class="form-group">
+                    <input type="password" class="form-control" id="password" placeholder=" " required>
+                    <label for="password" class="form-label">
+                        <span class="icon-lock"></span> Password
+                    </label>
+                </div>
+                
+                <button type="submit" class="btn btn-primary" id="loginBtn">
+                    Login
+                </button>
+            </form>
+            
+            <div class="divider">
+                <span>or</span>
+            </div>
+            
+            <button type="button" class="btn btn-outline-secondary" onclick="showRegisterForm()">
+                Create New Account
+            </button>
+        </div>
+        
+        <div id="registerForm" style="display: none;">
+            <form id="registerFormElement">
+                <div class="form-group">
+                    <input type="text" class="form-control" id="regUsername" placeholder=" " required>
+                    <label for="regUsername" class="form-label">
+                        <span class="icon-user"></span> Username
+                    </label>
+                </div>
+                
+                <div class="form-group">
+                    <input type="email" class="form-control" id="regEmail" placeholder=" " required>
+                    <label for="regEmail" class="form-label">✉️ Email</label>
+                </div>
+                
+                <div class="form-group">
+                    <input type="password" class="form-control" id="regPassword" placeholder=" " required>
+                    <label for="regPassword" class="form-label">
+                        <span class="icon-lock"></span> Password
+                    </label>
+                    <div class="password-strength" id="passwordStrength"></div>
+                </div>
+                
+                <div class="form-group">
+                    <input type="password" class="form-control" id="regConfirmPassword" placeholder=" " required>
+                    <label for="regConfirmPassword" class="form-label">
+                        <span class="icon-lock"></span> Confirm Password
+                    </label>
+                </div>
+                
+                <button type="submit" class="btn btn-primary" id="registerBtn">
+                    Create Account
+                </button>
+            </form>
+            
+            <div class="divider">
+                <span>or</span>
+            </div>
+            
+            <button type="button" class="btn btn-outline-secondary" onclick="showLoginForm()">
+                Back to Login
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // Lightweight authentication functionality
+        let isLoading = false;
+
+        // Show alert function
+        function showAlert(message, type = 'danger') {
+            const alertContainer = document.getElementById('alertContainer');
+            alertContainer.innerHTML = `<div class="alert alert-${type}">${message}</div>`;
+            setTimeout(() => {
+                if (alertContainer.innerHTML.includes(message)) {
+                    alertContainer.innerHTML = '';
+                }
+            }, 5000);
+        }
+
+        // Form switching
+        function showRegisterForm() {
+            document.getElementById('loginForm').style.display = 'none';
+            document.getElementById('registerForm').style.display = 'block';
+            document.getElementById('alertContainer').innerHTML = '';
+        }
+
+        function showLoginForm() {
+            document.getElementById('registerForm').style.display = 'none';
+            document.getElementById('loginForm').style.display = 'block';
+            document.getElementById('alertContainer').innerHTML = '';
+        }
+
+        // Password strength checker
+        function checkPasswordStrength(password) {
+            let strength = 0;
+            if (password.length >= 8) strength++;
+            if (/[a-z]/.test(password)) strength++;
+            if (/[A-Z]/.test(password)) strength++;
+            if (/[0-9]/.test(password)) strength++;
+            if (/[^A-Za-z0-9]/.test(password)) strength++;
+
+            const strengthElement = document.getElementById('passwordStrength');
+            if (password.length === 0) {
+                strengthElement.textContent = '';
+                return;
+            }
+
+            if (strength < 3) {
+                strengthElement.textContent = 'Weak password';
+                strengthElement.className = 'password-strength strength-weak';
+            } else if (strength < 5) {
+                strengthElement.textContent = 'Medium password';
+                strengthElement.className = 'password-strength strength-medium';
+            } else {
+                strengthElement.textContent = 'Strong password';
+                strengthElement.className = 'password-strength strength-strong';
+            }
+        }
+
+        // Login form handler
+        document.getElementById('loginFormElement').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            if (isLoading) return;
+            
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            
+            if (!username || !password) {
+                showAlert('Please enter both username and password');
+                return;
+            }
+            
+            isLoading = true;
+            const loginBtn = document.getElementById('loginBtn');
+            loginBtn.disabled = true;
+            loginBtn.textContent = 'Logging in';
+            loginBtn.classList.add('loading');
+            
+            try {
+                console.log('Attempting login with:', { username });
+                
+                if (!window.electronAPI || !window.electronAPI.loginUser) {
+                    throw new Error('electronAPI.loginUser not available');
+                }
+                
+                const result = await window.electronAPI.loginUser({ username, password });
+                console.log('Login result:', result);
+                
+                if (result.success) {
+                    showAlert('Login successful! Redirecting...', 'success');
+                    // Navigate to dashboard
+                    setTimeout(() => {
+                        window.electronAPI.navigateToDashboard();
+                    }, 1000);
+                } else {
+                    showAlert(result.error || 'Login failed');
+                }
+            } catch (error) {
+                console.error('Login error:', error);
+                showAlert(`Login failed: ${error.message}`);
+            } finally {
+                isLoading = false;
+                loginBtn.disabled = false;
+                loginBtn.textContent = 'Login';
+                loginBtn.classList.remove('loading');
+            }
+        });
+
+        // Register form handler
+        document.getElementById('registerFormElement').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            if (isLoading) return;
+            
+            const username = document.getElementById('regUsername').value;
+            const email = document.getElementById('regEmail').value;
+            const password = document.getElementById('regPassword').value;
+            const confirmPassword = document.getElementById('regConfirmPassword').value;
+            
+            if (!username || !email || !password || !confirmPassword) {
+                showAlert('Please fill in all fields');
+                return;
+            }
+            
+            if (password !== confirmPassword) {
+                showAlert('Passwords do not match');
+                return;
+            }
+            
+            if (password.length < 8) {
+                showAlert('Password must be at least 8 characters long');
+                return;
+            }
+            
+            isLoading = true;
+            const registerBtn = document.getElementById('registerBtn');
+            registerBtn.disabled = true;
+            registerBtn.textContent = 'Creating Account';
+            registerBtn.classList.add('loading');
+            
+            try {
+                const result = await window.electronAPI.registerUser({ username, email, password });
+                
+                if (result.success) {
+                    showAlert('Account created successfully! You can now log in.', 'success');
+                    setTimeout(() => {
+                        showLoginForm();
+                        // Pre-fill username
+                        document.getElementById('username').value = username;
+                    }, 2000);
+                } else {
+                    showAlert(result.error || 'Registration failed');
+                }
+            } catch (error) {
+                console.error('Registration error:', error);
+                showAlert('Registration failed. Please try again.');
+            } finally {
+                isLoading = false;
+                registerBtn.disabled = false;
+                registerBtn.textContent = 'Create Account';
+                registerBtn.classList.remove('loading');
+            }
+        });
+
+        // Password strength checking
+        document.getElementById('regPassword').addEventListener('input', (e) => {
+            checkPasswordStrength(e.target.value);
+        });
+
+        // Auto-focus first input
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('username').focus();
+            
+            // Check if electronAPI is available and debug what methods exist
+            console.log('electronAPI available:', !!window.electronAPI);
+            if (window.electronAPI) {
+                console.log('electronAPI methods:', Object.keys(window.electronAPI));
+                console.log('loginUser method exists:', typeof window.electronAPI.loginUser);
+            } else {
+                showAlert('Application not properly initialized. Please restart the app.', 'danger');
+            }
+        });
+
+        // Enter key handling
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !isLoading) {
+                const activeForm = document.getElementById('loginForm').style.display !== 'none' ? 'loginForm' : 'registerForm';
+                if (activeForm === 'loginForm') {
+                    document.getElementById('loginFormElement').dispatchEvent(new Event('submit'));
+                } else {
+                    document.getElementById('registerFormElement').dispatchEvent(new Event('submit'));
+                }
+            }
+        });
+
+        // Memory cleanup for login page
+        window.addEventListener('beforeunload', () => {
+            // Clear any cached data
+            if (window.gc) window.gc();
+        });
+    </script>
+</body>
+</html> 

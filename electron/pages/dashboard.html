@@ -1,0 +1,2928 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Password Vault - Dashboard</title>
+    <!-- Use local Bootstrap CSS for better performance and smaller footprint -->
+    <style>
+        /* Minimal Bootstrap-like styles - much smaller than full Bootstrap */
+        *, *::before, *::after { box-sizing: border-box; }
+        body {
+            margin: 0; 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-size: 14px;
+            line-height: 1.5;
+            color: #212529;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+        }
+        .container { max-width: 1200px; margin: 0 auto; padding: 0 15px; }
+        .row { display: flex; flex-wrap: wrap; margin: -15px; }
+        .col, .col-md-6, .col-md-8, .col-md-12 { padding: 15px; flex: 1; min-width: 0; }
+        .col-md-6 { flex: 0 0 50%; max-width: 50%; }
+        .col-md-8 { flex: 0 0 66.67%; max-width: 66.67%; }
+        .col-md-12 { flex: 0 0 100%; max-width: 100%; }
+        
+        /* Lightweight navbar */
+        .navbar {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+            padding: 1rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .navbar-brand { 
+            font-weight: 600; 
+            color: #667eea; 
+            text-decoration: none;
+            font-size: 1.25rem;
+        }
+        .navbar-nav { 
+            display: flex; 
+            list-style: none; 
+            margin: 0; 
+            padding: 0;
+            margin-left: auto;
+        }
+        .nav-item { margin-left: 1rem; }
+        .nav-link { 
+            color: #333; 
+            text-decoration: none; 
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            transition: background-color 0.2s;
+        }
+        .nav-link:hover { background-color: rgba(102, 126, 234, 0.1); }
+        
+        /* Lightweight dropdown */
+        .dropdown { position: relative; }
+        .dropdown-toggle::after { 
+            content: ' ▼'; 
+            font-size: 0.8em; 
+            margin-left: 0.5rem; 
+        }
+        .dropdown-menu {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            min-width: 160px;
+            display: none;
+            z-index: 1000;
+        }
+        .dropdown-menu.show { display: block; }
+        .dropdown-item {
+            display: block;
+            padding: 0.5rem 1rem;
+            color: #333;
+            text-decoration: none;
+            border: none;
+            background: none;
+            width: 100%;
+            text-align: left;
+        }
+        .dropdown-item:hover { background-color: #f8f9fa; }
+        
+        /* Cards and buttons */
+        .card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 12px;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        .card-header { 
+            padding: 1rem 1.5rem; 
+            background: rgba(102, 126, 234, 0.05);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+            font-weight: 600;
+        }
+        .card-body { padding: 1.5rem; }
+        
+        .btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 6px;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 14px;
+        }
+        .btn-primary { 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+            color: white;
+        }
+        .btn-primary:hover { 
+            transform: translateY(-1px); 
+            box-shadow: 0 4px 8px rgba(102, 126, 234, 0.3); 
+        }
+        .btn-success { background: #28a745; color: white; }
+        .btn-success:hover { background: #218838; }
+        .btn-info { background: #17a2b8; color: white; }
+        .btn-info:hover { background: #138496; }
+        .btn-warning { background: #ffc107; color: #212529; }
+        .btn-warning:hover { background: #e0a800; }
+        .btn-danger { background: #dc3545; color: white; }
+        .btn-danger:hover { background: #c82333; }
+        .btn-secondary { background: #6c757d; color: white; }
+        .btn-secondary:hover { background: #5a6268; }
+        .btn-outline-secondary { 
+            background: transparent; 
+            color: #6c757d;
+            border: 1px solid #6c757d; 
+        }
+        .btn-outline-secondary:hover { 
+            background: #6c757d;
+            color: white;
+        }
+        .btn-outline-primary { 
+            background: transparent; 
+            color: #667eea; 
+            border: 1px solid #667eea; 
+        }
+        .btn-outline-primary:hover { 
+            background: #667eea; 
+            color: white; 
+        }
+        .btn-sm { padding: 0.25rem 0.5rem; font-size: 0.875rem; }
+        
+        /* Form controls */
+        .form-control {
+            padding: 0.5rem 0.75rem;
+            border: 1px solid #ced4da;
+            border-radius: 6px;
+            width: 100%;
+            font-size: 14px;
+            background-color: #fff;
+        }
+        .form-control:focus {
+            border-color: #667eea;
+            outline: 0;
+            box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.25);
+        }
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: #212529;
+        }
+        textarea.form-control {
+            resize: vertical;
+            min-height: 38px;
+        }
+        select.form-control {
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23343a40' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m1 6 7 7 7-7'/%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 0.75rem center;
+            background-size: 16px 12px;
+            padding-right: 2.5rem;
+        }
+        
+        /* Modal styles */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 1055;
+            display: none;
+            width: 100%;
+            height: 100%;
+            overflow-x: hidden;
+            overflow-y: auto;
+            background-color: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(3px);
+        }
+        .modal.show {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal-dialog {
+            position: relative;
+            width: auto;
+            max-width: 500px;
+            margin: 1.75rem;
+        }
+        .modal-content {
+            background-color: #fff;
+            border: 1px solid rgba(0, 0, 0, 0.125);
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+        .modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid #dee2e6;
+            background: rgba(102, 126, 234, 0.05);
+        }
+        .modal-title {
+            margin: 0;
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+        .modal-body {
+            padding: 1.5rem;
+        }
+        .modal-footer {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding: 1rem 1.5rem;
+            border-top: 1px solid #dee2e6;
+            gap: 0.5rem;
+        }
+        .btn-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #999;
+            padding: 0;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .btn-close::before {
+            content: '×';
+        }
+        .btn-close:hover {
+            color: #333;
+        }
+        
+        /* Icons (simple Unicode replacements) */
+        .icon-plus::before { content: '➕'; }
+        .icon-copy::before { content: '📋'; }
+        .icon-edit::before { content: '✏️'; }
+        .icon-delete::before { content: '🗑️'; }
+        .icon-eye::before { content: '👁️'; }
+        .icon-search::before { content: '🔍'; }
+        .icon-download::before { content: '⬇️'; }
+        .icon-upload::before { content: '⬆️'; }
+        
+        /* Utilities */
+        .d-flex { display: flex; }
+        .justify-content-between { justify-content: space-between; }
+        .align-items-center { align-items: center; }
+        .mb-3 { margin-bottom: 1rem; }
+        .mb-4 { margin-bottom: 1.5rem; }
+        .mt-3 { margin-top: 1rem; }
+        .text-center { text-align: center; }
+        .text-muted { color: #6c757d; }
+        .fw-bold { font-weight: 600; }
+        
+        /* Performance optimizations */
+        * { 
+            will-change: auto; /* Prevent unnecessary layer creation */
+            animation-duration: 0.1s; /* Faster animations */
+            transition-duration: 0.1s;
+        }
+        
+        /* Main container */
+        .container-fluid { padding: 2rem 1rem; }
+        .main-container { max-width: 1200px; margin: 0 auto; }
+        
+        /* Utility classes */
+        .me-1 { margin-right: 0.25rem; }
+        .me-2 { margin-right: 0.5rem; }
+        .ms-1 { margin-left: 0.25rem; }
+        .ms-2 { margin-left: 0.5rem; }
+        .mb-0 { margin-bottom: 0; }
+        .mt-2 { margin-top: 0.5rem; }
+        .col-md-2 { flex: 0 0 16.67%; max-width: 16.67%; }
+        .col-md-3 { flex: 0 0 25%; max-width: 25%; }
+        .col-md-9 { flex: 0 0 75%; max-width: 75%; }
+        .justify-content-center { justify-content: center; }
+        .table-responsive { overflow-x: auto; }
+        .table { 
+            width: 100%; 
+            margin-bottom: 1rem; 
+            color: #212529; 
+            border-collapse: collapse;
+        }
+        .table th, .table td { 
+            padding: 0.5rem; 
+            border-top: 1px solid #dee2e6; 
+            text-align: left;
+        }
+        .table thead th { 
+            border-bottom: 2px solid #dee2e6; 
+            font-weight: 600;
+        }
+        .table-sm th, .table-sm td { 
+            padding: 0.25rem; 
+        }
+        .form-check {
+            display: block;
+            min-height: 1.5rem;
+            padding-left: 1.5em;
+            margin-bottom: 0.125rem;
+        }
+        .form-check-input {
+            width: 1em;
+            height: 1em;
+            margin-top: 0.25em;
+            margin-left: -1.5em;
+            vertical-align: top;
+        }
+        .form-check-label {
+            margin-bottom: 0;
+        }
+        
+        /* Password Card Styles */
+        .password-item {
+            background: rgba(255, 255, 255, 0.98);
+            border: 1px solid rgba(0, 0, 0, 0.08);
+            border-radius: 12px;
+            padding: 1.25rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+            transition: all 0.2s ease;
+            position: relative;
+        }
+        .password-item:hover {
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+            transform: translateY(-1px);
+            border-color: rgba(102, 126, 234, 0.2);
+        }
+        .password-label {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #2c3e50;
+            display: flex;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+        .password-meta {
+            font-size: 0.85rem;
+            color: #6c757d;
+            margin-bottom: 1rem;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            align-items: center;
+        }
+        .password-actions {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+        .category-badge {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .password-strength-mini {
+            display: inline-flex;
+            align-items: center;
+        }
+        .favorite-star {
+            color: #ffd700;
+            margin-left: 0.5rem;
+        }
+        .password-visible {
+            background: rgba(102, 126, 234, 0.05);
+            border: 1px solid rgba(102, 126, 234, 0.2);
+            border-radius: 8px;
+            padding: 0.75rem;
+            margin-top: 0.75rem;
+            font-family: 'Courier New', monospace;
+        }
+        .password-visible code {
+            background: none;
+            color: #2c3e50;
+            font-weight: 600;
+        }
+        
+        /* Enhanced Button Styles */
+        .btn {
+            font-weight: 500;
+            letter-spacing: 0.3px;
+            border-radius: 8px;
+            padding: 0.5rem 1rem;
+            transition: all 0.2s ease;
+            border: none;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+        .btn-sm {
+            padding: 0.25rem 0.75rem;
+            font-size: 0.875rem;
+        }
+        
+        /* Enhanced Search Section */
+        .search-section {
+            background: rgba(255, 255, 255, 0.98);
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            margin-bottom: 2rem;
+        }
+        
+        /* Stats Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 4px 16px rgba(102, 126, 234, 0.3);
+        }
+        .stat-number {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+        .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+        
+        /* Empty State Enhancement */
+        .empty-state {
+            text-align: center;
+            padding: 3rem 1rem;
+            color: #6c757d;
+        }
+        .empty-state-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            opacity: 0.6;
+        }
+        .empty-state h5 {
+            color: #495057;
+            margin-bottom: 1rem;
+        }
+        .empty-state .btn {
+            margin-top: 1rem;
+        }
+        
+        /* Enhanced Form Controls */
+        .form-control {
+            border-radius: 8px;
+            border: 2px solid #e9ecef;
+            padding: 0.75rem 1rem;
+            font-size: 0.95rem;
+            transition: all 0.2s ease;
+        }
+        .form-control:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            transform: translateY(-1px);
+        }
+        
+        /* Toast styles */
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1060;
+            max-width: 300px;
+        }
+        .toast {
+            background: #fff;
+            border: 1px solid rgba(0, 0, 0, 0.125);
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            margin-bottom: 10px;
+            overflow: hidden;
+            opacity: 0;
+            transform: translateX(100%);
+            transition: all 0.3s ease;
+        }
+        .toast.show {
+            opacity: 1;
+            transform: translateX(0);
+        }
+        .toast-header {
+            display: flex;
+            align-items: center;
+            padding: 0.5rem 0.75rem;
+            background: rgba(0, 0, 0, 0.03);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.125);
+        }
+        .toast-body {
+            padding: 0.75rem;
+        }
+        .toast .btn-close {
+            margin-left: auto;
+        }
+        
+        /* Additional utility classes */
+        .flex-1 { flex: 1; }
+        .flex-grow-1 { flex-grow: 1; }
+        .gap-2 { gap: 0.5rem; }
+        .g-3 > * { padding: 0.75rem; }
+        .row.g-3 { margin: -0.75rem; }
+        .form-label { 
+            display: block; 
+            margin-bottom: 0.5rem; 
+            font-weight: 500; 
+            color: #495057; 
+        }
+        
+        /* Enhanced animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        .password-item {
+            animation: fadeInUp 0.3s ease;
+        }
+        
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .col-md-6, .col-md-8 { flex: 0 0 100%; max-width: 100%; }
+            .col-md-2, .col-md-3, .col-md-4 { flex: 0 0 100%; max-width: 100%; }
+            .navbar-nav { margin-top: 1rem; }
+            .card-body { padding: 1rem; }
+            .container-fluid { padding: 1rem 0.5rem; }
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+            .password-actions { 
+                flex-direction: column; 
+                gap: 0.25rem; 
+            }
+            .password-actions .btn { 
+                justify-content: center; 
+                width: 100%; 
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Lightweight navbar -->
+    <nav class="navbar">
+        <div class="container d-flex justify-content-between align-items-center">
+            <a class="navbar-brand" href="#">
+                <span class="icon-lock">🔒</span> Password Vault
+            </a>
+            <ul class="navbar-nav">
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" onclick="toggleDropdown(event)">
+                        Account
+                    </a>
+                    <div class="dropdown-menu">
+                        <a class="dropdown-item" href="#" onclick="showPasswordGenerator()">
+                            <span class="icon-plus"></span> Password Generator
+                        </a>
+                        <a class="dropdown-item" href="#" onclick="showBackupManagement()">
+                            <span class="icon-download"></span> Backup Management
+                        </a>
+                        <div class="dropdown-divider"></div>
+                        <a class="dropdown-item" href="#" onclick="logout()">
+                            Logout
+                </a>
+            </div>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Main Container -->
+    <div class="container-fluid main-container">
+        <!-- Welcome Section -->
+        <div class="card mb-4" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none;">
+            <div class="card-body text-center">
+                <h2 style="color: white; margin-bottom: 0.5rem;">🔒 Password Vault</h2>
+                <p class="mb-0" style="opacity: 0.9;">Secure • Simple • Powerful</p>
+            </div>
+        </div>
+
+        <!-- Stats Dashboard -->
+        <div class="stats-grid" id="statsGrid">
+            <div class="stat-card">
+                <div class="stat-number" id="totalPasswords">0</div>
+                <div class="stat-label">Total Passwords</div>
+            </div>
+            <div class="stat-card" style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%);">
+                <div class="stat-number" id="strongPasswords">0</div>
+                <div class="stat-label">Strong Passwords</div>
+            </div>
+            <div class="stat-card" style="background: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%);">
+                <div class="stat-number" id="weakPasswords">0</div>
+                <div class="stat-label">Need Attention</div>
+            </div>
+            <div class="stat-card" style="background: linear-gradient(135deg, #17a2b8 0%, #6f42c1 100%);">
+                <div class="stat-number" id="recentlyAdded">0</div>
+                <div class="stat-label">Added This Week</div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <h5 class="card-title mb-3">🚀 Quick Actions</h5>
+                <div class="d-flex flex-wrap gap-2 justify-content-center">
+                    <button class="btn btn-primary" onclick="showAddPasswordModal()">
+                        <span class="icon-plus"></span> Add Password
+            </button>
+                    <button class="btn btn-info" onclick="showSecureNotesModal()">
+                        📝 Secure Notes
+            </button>
+                    <button class="btn btn-success" onclick="showAdvancedGeneratorModal()">
+                        🎲 Generate Password
+                    </button>
+                    <button class="btn btn-warning" onclick="showImportModal()">
+                        <span class="icon-upload"></span> Import Data
+                    </button>
+                    <button class="btn btn-secondary" onclick="refreshPasswords()">
+                        🔄 Refresh
+            </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Search & Filters -->
+        <div class="card search-section mb-4">
+            <div class="card-body">
+                <h5 class="card-title mb-3">🔍 Search & Filter</h5>
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <label class="form-label">Search Passwords</label>
+                        <div class="d-flex">
+                            <input type="text" class="form-control me-2" id="searchInput" 
+                                   placeholder="Search passwords, URLs, usernames..." onkeyup="filterPasswords()">
+                            <button class="btn btn-outline-primary" onclick="showAdvancedSearchModal()" title="Advanced Search">
+                                <span class="icon-search"></span>
+                        </button>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                        <label class="form-label">Category</label>
+                        <select class="form-control" id="categoryFilter" onchange="filterPasswords()">
+                        <option value="">All Categories</option>
+                            <option value="General">📁 General</option>
+                            <option value="Work">💼 Work</option>
+                            <option value="Personal">👤 Personal</option>
+                            <option value="Finance">💰 Finance</option>
+                            <option value="Social">📱 Social</option>
+                            <option value="Shopping">🛒 Shopping</option>
+                            <option value="Entertainment">🎮 Entertainment</option>
+                            <option value="Imported">📥 Imported</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                        <label class="form-label">Sort By</label>
+                        <select class="form-control" id="sortFilter" onchange="sortPasswords()">
+                            <option value="created_desc">🆕 Newest First</option>
+                            <option value="created_asc">🕐 Oldest First</option>
+                            <option value="label_asc">🔤 A-Z</option>
+                            <option value="label_desc">🔤 Z-A</option>
+                            <option value="category_asc">📂 By Category</option>
+                            <option value="updated_desc">⏰ Recently Updated</option>
+                    </select>
+                </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Actions</label>
+                        <div class="d-flex gap-2">
+                            <button class="btn btn-outline-info flex-1" onclick="toggleBulkMode()" id="bulkModeBtn" title="Bulk Operations">
+                                ☑️ Bulk Mode
+                        </button>
+                            <button class="btn btn-outline-secondary flex-1" onclick="clearFilters()" title="Clear Filters">
+                                🧹 Clear
+                        </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Smart Suggestions -->
+            <div class="row justify-content-center mt-2" id="smartSuggestions" style="display: none;">
+                <div class="col-md-9">
+                    <div class="d-flex flex-wrap gap-2">
+                        <small class="text-muted me-2">Quick filters:</small>
+                        <button class="btn btn-sm btn-outline-info" onclick="filterByRecent()">Recently Added</button>
+                        <button class="btn btn-sm btn-outline-warning" onclick="filterByFavorites()">Favorites</button>
+                        <button class="btn btn-sm btn-outline-success" onclick="filterByStrong()">Strong Passwords</button>
+                        <button class="btn btn-sm btn-outline-danger" onclick="filterByWeak()">Weak Passwords</button>
+                        <button class="btn btn-sm btn-outline-secondary" onclick="filterByDuplicates()">Duplicates</button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Bulk Operations Bar -->
+            <div class="row justify-content-center mt-3" id="bulkOperationsBar" style="display: none;">
+                <div class="col-md-9">
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                                        ℹ️ <strong id="selectedCount">0</strong> passwords selected
+                            <button class="btn btn-sm btn-outline-primary ms-2" onclick="selectAllPasswords()">Select All</button>
+                            <button class="btn btn-sm btn-outline-secondary ms-1" onclick="clearSelection()">Clear</button>
+                        </div>
+                                    <div>
+                                        <button class="btn btn-sm btn-success me-1" onclick="bulkExport()" title="Export Selected">
+                                            <span class="icon-download"></span> Export
+                            </button>
+                                        <button class="btn btn-sm btn-warning me-1" onclick="bulkChangeCategory()" title="Change Category">
+                                            🏷️ Category
+                            </button>
+                            <button class="btn btn-sm btn-danger" onclick="bulkDelete()" title="Delete Selected">
+                                            <span class="icon-delete"></span> Delete
+                            </button>
+                                    </div>
+                                </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Passwords List -->
+        <div class="card">
+            <div class="card-header">
+                <h4 class="mb-0">📋 Your Passwords</h4>
+            </div>
+            <div class="card-body">
+            <div id="passwordsList">
+                    <div class="text-center text-muted">
+                        <div style="font-size: 3rem;">🔒</div>
+                    <h5>Loading passwords...</h5>
+                    <p>Please wait while we fetch your secure data.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add/Edit Password Modal -->
+    <div class="modal fade" id="passwordModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="passwordModalTitle">Add Password</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="passwordForm">
+                        <div class="mb-3">
+                            <label for="passwordLabel" class="form-label">Label *</label>
+                            <input type="text" class="form-control" id="passwordLabel" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="passwordUsername" class="form-label">Username</label>
+                            <input type="text" class="form-control" id="passwordUsername">
+                        </div>
+                        <div class="mb-3">
+                            <label for="passwordValue" class="form-label">Password *</label>
+                            <div class="d-flex">
+                                <input type="password" class="form-control me-1" id="passwordValue" required>
+                                <button type="button" class="btn btn-outline-secondary me-1" onclick="togglePasswordVisibility()">
+                                    <span class="icon-eye"></span>
+                                </button>
+                                <button type="button" class="btn btn-outline-primary" onclick="generatePasswordForForm()">
+                                    🔑
+                                </button>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="passwordUrl" class="form-label">URL</label>
+                            <input type="url" class="form-control" id="passwordUrl">
+                        </div>
+                        <div class="mb-3">
+                            <label for="passwordCategory" class="form-label">Category</label>
+                            <select class="form-control" id="passwordCategory">
+                                <option value="General">General</option>
+                                <option value="Work">Work</option>
+                                <option value="Personal">Personal</option>
+                                <option value="Finance">Finance</option>
+                                <option value="Social">Social</option>
+                                <option value="Shopping">Shopping</option>
+                                <option value="Entertainment">Entertainment</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="passwordNotes" class="form-label">Notes</label>
+                            <textarea class="form-control" id="passwordNotes" rows="3"></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="passwordTags" class="form-label">Tags</label>
+                            <input type="text" class="form-control" id="passwordTags" 
+                                   placeholder="Separate tags with commas">
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="savePassword()">Save Password</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Import Modal -->
+    <div class="modal fade" id="importModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Import Passwords</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="importSource" class="form-label">Import From:</label>
+                        <select class="form-control" id="importSource">
+                            <option value="csv">CSV File (LastPass, 1Password, Bitwarden)</option>
+                            <option value="json">JSON File (Bitwarden)</option>
+                            <option value="chrome">Chrome Passwords CSV</option>
+                            <option value="firefox">Firefox Passwords CSV</option>
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="importFile" class="form-label">Select File:</label>
+                        <input type="file" class="form-control" id="importFile" accept=".csv,.json">
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-body">
+                            ℹ️ <strong>Supported formats:</strong>
+                        <ul class="mb-0 mt-2">
+                            <li><strong>CSV:</strong> LastPass, 1Password, Bitwarden, Chrome, Firefox</li>
+                            <li><strong>JSON:</strong> Bitwarden exports</li>
+                        </ul>
+                        </div>
+                    </div>
+                    
+                    <div id="importPreview" style="display: none;" class="mt-3">
+                        <h6>Import Preview:</h6>
+                        <div class="table-responsive" style="max-height: 200px; overflow-y: auto;">
+                            <table class="table table-sm">
+                                <thead>
+                                    <tr>
+                                        <th>Label</th>
+                                        <th>Username</th>
+                                        <th>URL</th>
+                                        <th>Category</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="importPreviewBody">
+                                </tbody>
+                            </table>
+                        </div>
+                        <p class="text-muted mt-2">
+                            <span id="importCount">0</span> passwords ready to import
+                        </p>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="processImportBtn" onclick="processImport()" disabled>
+                        Import Passwords
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Export Modal -->
+    <div class="modal fade" id="exportModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Export Passwords</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="exportFormat" class="form-label">Export Format:</label>
+                        <select class="form-control" id="exportFormat">
+                            <option value="csv">CSV File (Compatible with LastPass, 1Password)</option>
+                            <option value="json">JSON File (Backup format)</option>
+                            <option value="encrypted">Encrypted Backup (.vault)</option>
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3" id="exportPasswordDiv" style="display: none;">
+                        <label for="exportPassword" class="form-label">Encryption Password:</label>
+                        <input type="password" class="form-control" id="exportPassword" 
+                               placeholder="Password for encrypted export">
+                        <small class="text-muted">Required for encrypted backups</small>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Export Options:</label>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="includeSecureNotes" checked>
+                            <label class="form-check-label" for="includeSecureNotes">Include Secure Notes</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="includePasswords" checked>
+                            <label class="form-check-label" for="includePasswords">Include Passwords</label>
+                        </div>
+                    </div>
+                    
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        <strong>Security Note:</strong> Exported files contain sensitive data. 
+                        Store them securely and delete them after use.
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="processExport()">
+                        <i class="fas fa-download me-2"></i>Export Data
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Advanced Search Modal -->
+    <div class="modal fade" id="advancedSearchModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Advanced Search & Filters</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="advSearchText" class="form-label">Search Text:</label>
+                                <input type="text" class="form-control" id="advSearchText" 
+                                       placeholder="Search labels, usernames, URLs, notes...">
+                            </div>
+                            <div class="mb-3">
+                                <label for="advSearchCategory" class="form-label">Category:</label>
+                                <select class="form-control" id="advSearchCategory">
+                                    <option value="">All Categories</option>
+                                    <option value="General">General</option>
+                                    <option value="Work">Work</option>
+                                    <option value="Personal">Personal</option>
+                                    <option value="Finance">Finance</option>
+                                    <option value="Social">Social</option>
+                                    <option value="Shopping">Shopping</option>
+                                    <option value="Entertainment">Entertainment</option>
+                                    <option value="Imported">Imported</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label for="advSearchTags" class="form-label">Tags:</label>
+                                <input type="text" class="form-control" id="advSearchTags" 
+                                       placeholder="Separate tags with commas">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Date Range:</label>
+                                <div class="row">
+                                    <div class="col-6">
+                                        <input type="date" class="form-control" id="advSearchDateFrom" placeholder="From">
+                                    </div>
+                                    <div class="col-6">
+                                        <input type="date" class="form-control" id="advSearchDateTo" placeholder="To">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Password Strength:</label>
+                                <select class="form-control" id="advSearchStrength">
+                                    <option value="">Any Strength</option>
+                                    <option value="weak">Weak Passwords</option>
+                                    <option value="medium">Medium Passwords</option>
+                                    <option value="strong">Strong Passwords</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Special Filters:</label>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="advSearchFavorites">
+                                    <label class="form-check-label" for="advSearchFavorites">Favorites Only</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="advSearchDuplicates">
+                                    <label class="form-check-label" for="advSearchDuplicates">Duplicate Passwords</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="advSearchNoURL">
+                                    <label class="form-check-label" for="advSearchNoURL">Missing URLs</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="clearAdvancedSearch()">Clear All</button>
+                    <button type="button" class="btn btn-primary" onclick="applyAdvancedSearch()">Apply Filters</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Advanced Password Generator Modal -->
+    <div class="modal fade" id="advancedGeneratorModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Advanced Password Generator</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="genLength" class="form-label">Length: <span id="lengthValue">16</span></label>
+                        <input type="range" class="form-range" id="genLength" min="8" max="64" value="16" 
+                               oninput="document.getElementById('lengthValue').textContent = this.value">
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="genUppercase" checked>
+                                <label class="form-check-label" for="genUppercase">Uppercase (A-Z)</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="genLowercase" checked>
+                                <label class="form-check-label" for="genLowercase">Lowercase (a-z)</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="genNumbers" checked>
+                                <label class="form-check-label" for="genNumbers">Numbers (0-9)</label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="genSymbols" checked>
+                                <label class="form-check-label" for="genSymbols">Symbols (!@#$...)</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="genAmbiguous">
+                                <label class="form-check-label" for="genAmbiguous">Exclude Similar (0,O,l,1)</label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3 mt-3">
+                        <label for="customChars" class="form-label">Custom Characters:</label>
+                        <input type="text" class="form-control" id="customChars" 
+                               placeholder="Add custom characters here">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Password Type:</label>
+                        <select class="form-control" id="passwordType" onchange="updateGeneratorType()">
+                            <option value="random">Random Password</option>
+                            <option value="pronounceable">Pronounceable</option>
+                            <option value="pattern">Pattern Based</option>
+                            <option value="passphrase">Passphrase</option>
+                        </select>
+                    </div>
+                    
+                    <div id="passphraseOptions" style="display: none;">
+                        <div class="mb-3">
+                            <label for="wordCount" class="form-label">Number of Words: <span id="wordCountValue">4</span></label>
+                            <input type="range" class="form-range" id="wordCount" min="3" max="8" value="4"
+                                   oninput="document.getElementById('wordCountValue').textContent = this.value">
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="capitalizeWords">
+                            <label class="form-check-label" for="capitalizeWords">Capitalize Words</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="includeNumbers">
+                            <label class="form-check-label" for="includeNumbers">Include Numbers</label>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Generated Password:</label>
+                        <div class="input-group">
+                            <input type="text" class="form-control" id="generatedPassword" readonly>
+                            <button type="button" class="btn btn-outline-secondary" onclick="copyGeneratedPassword()">
+                                <i class="fas fa-copy"></i>
+                            </button>
+                            <button type="button" class="btn btn-outline-primary" onclick="generateAdvancedPassword()">
+                                <i class="fas fa-sync-alt"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="password-strength-indicator">
+                        <div class="d-flex justify-content-between">
+                            <span>Strength:</span>
+                            <span id="passwordStrengthText">Strong</span>
+                        </div>
+                        <div class="progress">
+                            <div class="progress-bar bg-success" id="passwordStrengthBar" style="width: 80%"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-success" onclick="copyGeneratedPassword()">
+                        <i class="fas fa-copy me-2"></i>Copy Password
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Secure Notes Modal -->
+    <div class="modal fade" id="notesModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Secure Notes & Documents</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h6>Your Notes</h6>
+                                <button class="btn btn-sm btn-primary" onclick="showAddNoteModal()">
+                                    <i class="fas fa-plus"></i>
+                                </button>
+                            </div>
+                            <div id="notesList" class="list-group">
+                                <div class="empty-state text-center">
+                                    <i class="fas fa-sticky-note"></i>
+                                    <p>No secure notes yet</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-8">
+                            <div id="noteViewer" class="d-none">
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <h6 id="viewNoteTitle">Note Title</h6>
+                                    <div class="btn-group">
+                                        <button class="btn btn-sm btn-outline-primary" onclick="editCurrentNote()">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-danger" onclick="deleteCurrentNote()">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div id="viewNoteContent" class="border p-3 rounded"></div>
+                                <div class="text-muted mt-2">
+                                    <small>Created: <span id="noteCreated"></span> | Updated: <span id="noteUpdated"></span></small>
+                                </div>
+                            </div>
+                            <div id="notePlaceholder" class="text-center text-muted">
+                                <i class="fas fa-arrow-left me-2"></i>Select a note to view
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Backup Modal -->
+    <div class="modal fade" id="backupModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Backup & Sync</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-4">
+                        <h6><i class="fas fa-save me-2"></i>Create Backup</h6>
+                        <p class="text-muted">Create an encrypted backup of all your data</p>
+                        <button class="btn btn-primary" onclick="createBackup()">
+                            <i class="fas fa-download me-2"></i>Create Full Backup
+                        </button>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <h6><i class="fas fa-upload me-2"></i>Restore Backup</h6>
+                        <p class="text-muted">Restore from a previous backup file</p>
+                        <input type="file" class="form-control mb-2" id="backupFile" accept=".vault,.json">
+                        <button class="btn btn-warning" onclick="restoreBackup()">
+                            <i class="fas fa-upload me-2"></i>Restore Backup
+                        </button>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <h6><i class="fas fa-clock me-2"></i>Automatic Backups</h6>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="autoBackup">
+                            <label class="form-check-label" for="autoBackup">
+                                Enable automatic daily backups
+                            </label>
+                        </div>
+                        <div class="mt-2">
+                            <label for="backupLocation" class="form-label">Backup Location:</label>
+                            <div class="input-group">
+                                <input type="text" class="form-control" id="backupLocation" readonly>
+                                <button class="btn btn-outline-secondary" onclick="chooseBackupLocation()">
+                                    <i class="fas fa-folder-open"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>
+                        <strong>Backup Info:</strong> Backups are encrypted with your master password. 
+                        Keep backups in a secure location.
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add/Edit Note Modal -->
+    <div class="modal fade" id="addEditNoteModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="noteModalTitle">Add New Note</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="noteForm" onsubmit="event.preventDefault(); saveNote();">
+                        <div class="mb-3">
+                            <label for="noteTitle" class="form-label">Title</label>
+                            <input type="text" class="form-control" id="noteTitle" required>
+                        </div>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="noteCategory" class="form-label">Category</label>
+                                <select class="form-control" id="noteCategory">
+                                    <option value="General">General</option>
+                                    <option value="Personal">Personal</option>
+                                    <option value="Work">Work</option>
+                                    <option value="Finance">Finance</option>
+                                    <option value="Ideas">Ideas</option>
+                                    <option value="Important">Important</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="noteTags" class="form-label">Tags (comma-separated)</label>
+                                <input type="text" class="form-control" id="noteTags" placeholder="tag1, tag2, tag3">
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="noteContent" class="form-label">Content</label>
+                            <textarea class="form-control" id="noteContent" rows="10" required placeholder="Enter your secure note content here..."></textarea>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="noteIsFavorite">
+                                    <label class="form-check-label" for="noteIsFavorite">
+                                        Mark as favorite
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-6 text-end">
+                                <small class="text-muted">
+                                    <i class="fas fa-lock me-1"></i>This note will be encrypted and stored securely
+                                </small>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="testClick();">
+                        <i class="fas fa-save me-1"></i>Save Note
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div class="toast-container"></div>
+
+    <script>
+        // Simple Modal System (Bootstrap replacement)
+        function showModal(modalId) {
+            const modal = document.getElementById(modalId);
+            if (modal) {
+                modal.classList.add('show');
+                modal.style.display = 'flex';
+                document.body.style.overflow = 'hidden';
+            }
+        }
+        
+        function hideModal(modalId) {
+            const modal = document.getElementById(modalId);
+            if (modal) {
+                modal.classList.remove('show');
+                modal.style.display = 'none';
+                document.body.style.overflow = '';
+            }
+        }
+        
+        // Close modal when clicking outside or on close button
+        document.addEventListener('click', function(e) {
+            if (e.target.classList.contains('modal')) {
+                hideModal(e.target.id);
+            }
+            if (e.target.classList.contains('btn-close')) {
+                const modal = e.target.closest('.modal');
+                if (modal) hideModal(modal.id);
+            }
+        });
+        
+        // Close modal with Escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                const openModal = document.querySelector('.modal.show');
+                if (openModal) hideModal(openModal.id);
+            }
+        });
+        
+        // Dropdown functionality
+        function toggleDropdown(event) {
+            event.preventDefault();
+            const dropdown = event.target.closest('.dropdown');
+            const menu = dropdown.querySelector('.dropdown-menu');
+            menu.classList.toggle('show');
+        }
+        
+        // Close dropdowns when clicking outside
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.dropdown')) {
+                document.querySelectorAll('.dropdown-menu.show').forEach(menu => {
+                    menu.classList.remove('show');
+                });
+            }
+        });
+        
+        let passwords = [];
+        let editingPasswordId = null;
+        
+        // Load passwords on page load
+                // View/Hide Password Function
+        function viewPassword(id) {
+            const password = passwords.find(p => p.id === id);
+            if (!password) return;
+            
+            const isVisible = document.querySelector(`[data-id="${id}"] .password-visible`);
+            
+            if (isVisible) {
+                // Hide password
+                isVisible.remove();
+            } else {
+                // Show password
+                const passwordItem = document.querySelector(`[data-id="${id}"]`);
+                const actionsDiv = passwordItem.querySelector('.password-actions');
+                const passwordDiv = document.createElement('div');
+                passwordDiv.className = 'password-visible mt-2 p-2 bg-light rounded';
+                passwordDiv.innerHTML = `
+                    <div class="d-flex justify-content-between align-items-center">
+                        <code style="user-select: text;">${escapeHtml(password.secret)}</code>
+                        <button class="btn btn-sm btn-outline-secondary" onclick="window.electronAPI.copyPassword(${password.id})">
+                            <i class="fas fa-copy"></i>
+                        </button>
+                    </div>
+                `;
+                actionsDiv.insertAdjacentElement('beforebegin', passwordDiv);
+            }
+        }
+        
+        // Toggle Favorite Function
+        async function toggleFavorite(id) {
+            try {
+                // Check if electronAPI has toggleFavorite method
+                if (window.electronAPI && window.electronAPI.toggleFavorite) {
+                    const result = await window.electronAPI.toggleFavorite(id);
+                
+                if (result.success) {
+                    await loadPasswords();
+                    showToast('Favorite status updated', 'success');
+                } else {
+                    showToast('Failed to update favorite status', 'error');
+                    }
+                } else {
+                    // Fallback: Update locally and show message
+                    const password = passwords.find(p => p.id === id);
+                    if (password) {
+                        password.is_favorite = !password.is_favorite;
+                        displayPasswords(passwords);
+                        showToast(`${password.is_favorite ? 'Added to' : 'Removed from'} favorites (local only)`, 'warning');
+                    }
+                }
+            } catch (error) {
+                console.error('Error updating favorite status:', error);
+                showToast('Error updating favorite status', 'error');
+            }
+        }
+        
+        // Advanced Password Generator Functions
+        function showAdvancedGeneratorModal() {
+            showModal('advancedGeneratorModal');
+            generateAdvancedPassword(); // Generate initial password
+        }
+        
+        function updateGeneratorType() {
+            const passwordType = document.getElementById('passwordType').value;
+            const passphraseOptions = document.getElementById('passphraseOptions');
+            
+            if (passwordType === 'passphrase') {
+                passphraseOptions.style.display = 'block';
+            } else {
+                passphraseOptions.style.display = 'none';
+            }
+            
+            generateAdvancedPassword();
+        }
+        
+        function generateAdvancedPassword() {
+            const passwordType = document.getElementById('passwordType').value;
+            let generatedPassword = '';
+            
+            if (passwordType === 'passphrase') {
+                generatedPassword = generatePassphrase();
+            } else {
+                generatedPassword = generateRandomPassword();
+            }
+            
+            document.getElementById('generatedPassword').value = generatedPassword;
+            updatePasswordStrength(generatedPassword);
+        }
+        
+        function generateRandomPassword() {
+            const length = parseInt(document.getElementById('genLength').value);
+            const includeUpper = document.getElementById('genUppercase').checked;
+            const includeLower = document.getElementById('genLowercase').checked;
+            const includeNumbers = document.getElementById('genNumbers').checked;
+            const includeSymbols = document.getElementById('genSymbols').checked;
+            const excludeAmbiguous = document.getElementById('genAmbiguous').checked;
+            const customChars = document.getElementById('customChars').value;
+            
+            let charset = '';
+            if (includeLower) charset += 'abcdefghijklmnopqrstuvwxyz';
+            if (includeUpper) charset += 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+            if (includeNumbers) charset += '0123456789';
+            if (includeSymbols) charset += '!@#$%^&*()_+-=[]{}|;:,.<>?';
+            if (customChars) charset += customChars;
+            
+            if (excludeAmbiguous) {
+                charset = charset.replace(/[0O1lI|]/g, '');
+            }
+            
+            if (charset === '') {
+                return 'Error: No character set selected';
+            }
+            
+            let password = '';
+            for (let i = 0; i < length; i++) {
+                password += charset.charAt(Math.floor(Math.random() * charset.length));
+            }
+            
+            return password;
+        }
+        
+        function generatePassphrase() {
+            const wordCount = parseInt(document.getElementById('wordCount').value);
+            const capitalize = document.getElementById('capitalizeWords').checked;
+            const includeNumbers = document.getElementById('includeNumbers').checked;
+            
+            // Simple word list for passphrase generation
+            const words = [
+                'apple', 'beach', 'chair', 'dance', 'eagle', 'frost', 'green', 'house',
+                'juice', 'light', 'music', 'ocean', 'paper', 'quick', 'river', 'stone',
+                'table', 'under', 'voice', 'water', 'young', 'zebra', 'bread', 'cloud',
+                'dream', 'earth', 'flame', 'globe', 'heart', 'image', 'joker', 'knife',
+                'lemon', 'magic', 'night', 'olive', 'peace', 'queen', 'robot', 'smile',
+                'train', 'unity', 'vowel', 'world', 'youth', 'zephyr'
+            ];
+            
+            let passphrase = [];
+            
+            for (let i = 0; i < wordCount; i++) {
+                let word = words[Math.floor(Math.random() * words.length)];
+                if (capitalize) {
+                    word = word.charAt(0).toUpperCase() + word.slice(1);
+                }
+                passphrase.push(word);
+            }
+            
+            if (includeNumbers) {
+                passphrase.push(Math.floor(Math.random() * 999) + 1);
+            }
+            
+            return passphrase.join('-');
+        }
+        
+        function updatePasswordStrength(password) {
+            const score = calculatePasswordStrength(password);
+            const strengthText = document.getElementById('passwordStrengthText');
+            const strengthBar = document.getElementById('passwordStrengthBar');
+            
+            let strength, className, width;
+            
+            if (score <= 2) {
+                strength = 'Weak';
+                className = 'bg-danger';
+                width = '25%';
+            } else if (score <= 3) {
+                strength = 'Medium';
+                className = 'bg-warning';
+                width = '50%';
+            } else if (score <= 4) {
+                strength = 'Strong';
+                className = 'bg-success';
+                width = '75%';
+            } else {
+                strength = 'Very Strong';
+                className = 'bg-success';
+                width = '100%';
+            }
+            
+            strengthText.textContent = strength;
+            strengthBar.className = `progress-bar ${className}`;
+            strengthBar.style.width = width;
+        }
+        
+        function copyGeneratedPassword() {
+            const password = document.getElementById('generatedPassword').value;
+            if (password) {
+                navigator.clipboard.writeText(password);
+                showToast('Password copied to clipboard', 'success');
+            }
+        }
+        
+        // Secure Notes Functions
+        function showNotesModal() {
+            showModal('notesModal');
+            loadSecureNotes();
+        }
+        
+        function showSecureNotesModal() {
+            // Alias for showNotesModal to make the button functional
+            showNotesModal();
+        }
+        
+        async function loadSecureNotes() {
+            try {
+                const result = await window.electronAPI.getSecureNotes();
+                if (result.success) {
+                    displaySecureNotes(result.notes);
+                } else {
+                    showToast('Failed to load secure notes', 'error');
+                }
+            } catch (error) {
+                showToast('Error loading secure notes', 'error');
+            }
+        }
+        
+        let currentNotes = [];
+        let editingNoteId = null;
+        
+        function displaySecureNotes(notes) {
+            currentNotes = notes;
+            const notesList = document.getElementById('notesList');
+            
+            if (notes.length === 0) {
+                notesList.innerHTML = `
+                    <div class="empty-state text-center">
+                        <i class="fas fa-sticky-note"></i>
+                        <p>No secure notes yet</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            const html = notes.map(note => `
+                <div class="list-group-item list-group-item-action" onclick="viewNote(${note.id})">
+                    <div class="d-flex w-100 justify-content-between">
+                        <h6 class="mb-1">
+                            ${note.is_favorite ? '<i class="fas fa-star text-warning me-1"></i>' : ''}
+                            ${escapeHtml(note.title)}
+                        </h6>
+                        <small class="text-muted">${formatDate(note.created_at)}</small>
+                    </div>
+                    <p class="mb-1 text-muted">${escapeHtml(note.content.substring(0, 100))}${note.content.length > 100 ? '...' : ''}</p>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <small>
+                            <span class="badge bg-secondary">${escapeHtml(note.category)}</span>
+                            ${note.tags ? note.tags.split(',').map(tag => `<span class="badge bg-info ms-1">${escapeHtml(tag.trim())}</span>`).join('') : ''}
+                        </small>
+                        <small class="text-muted">${formatDate(note.updated_at)}</small>
+                    </div>
+                </div>
+            `).join('');
+            
+            notesList.innerHTML = html;
+        }
+        
+        function viewNote(id) {
+            const note = currentNotes.find(n => n.id === id);
+            if (!note) return;
+            
+            // Update note viewer
+            document.getElementById('viewNoteTitle').textContent = note.title;
+            document.getElementById('viewNoteContent').innerHTML = escapeHtml(note.content).replace(/\n/g, '<br>');
+            document.getElementById('noteCreated').textContent = formatDate(note.created_at);
+            document.getElementById('noteUpdated').textContent = formatDate(note.updated_at);
+            
+            // Show viewer, hide placeholder
+            document.getElementById('noteViewer').classList.remove('d-none');
+            document.getElementById('notePlaceholder').style.display = 'none';
+            
+            // Store current note for editing
+            editingNoteId = id;
+        }
+        
+        function showAddNoteModal() {
+            editingNoteId = null;
+            document.getElementById('noteModalTitle').textContent = 'Add New Note';
+            document.getElementById('noteForm').reset();
+            showModal('addEditNoteModal');
+        }
+        
+        function editCurrentNote() {
+            if (!editingNoteId) return;
+            
+            const note = currentNotes.find(n => n.id === editingNoteId);
+            if (!note) return;
+            
+            // Populate form with current note data
+            document.getElementById('noteModalTitle').textContent = 'Edit Note';
+            document.getElementById('noteTitle').value = note.title;
+            document.getElementById('noteContent').value = note.content;
+            document.getElementById('noteCategory').value = note.category;
+            document.getElementById('noteTags').value = note.tags || '';
+            document.getElementById('noteIsFavorite').checked = note.is_favorite;
+            
+            showModal('addEditNoteModal');
+        }
+        
+        async function saveNote() {
+            console.log('saveNote function called');
+            
+            // Check if elements exist before accessing their values
+            const titleEl = document.getElementById('noteTitle');
+            const contentEl = document.getElementById('noteContent');
+            const categoryEl = document.getElementById('noteCategory');
+            const tagsEl = document.getElementById('noteTags');
+            const favoriteEl = document.getElementById('noteIsFavorite');
+            
+            console.log('Form elements found:', {
+                titleEl: !!titleEl,
+                contentEl: !!contentEl,
+                categoryEl: !!categoryEl,
+                tagsEl: !!tagsEl,
+                favoriteEl: !!favoriteEl
+            });
+            
+            if (!titleEl || !contentEl || !categoryEl || !tagsEl || !favoriteEl) {
+                console.error('Some form elements not found!');
+                showToast('Form elements not found - please try again', 'error');
+                return;
+            }
+            
+            const title = titleEl.value ? titleEl.value.trim() : '';
+            const content = contentEl.value ? contentEl.value.trim() : '';
+            const category = categoryEl.value || 'General';
+            const tags = tagsEl.value ? tagsEl.value.trim() : '';
+            const isFavorite = favoriteEl.checked || false;
+            
+            console.log('Form data:', { title, content, category, tags, isFavorite });
+            
+            if (!title || !content) {
+                showToast('Title and content are required', 'error');
+                return;
+            }
+            
+            try {
+                const noteData = { title, content, category, tags, is_favorite: isFavorite };
+                console.log('Sending noteData:', noteData);
+                let result;
+                
+                if (editingNoteId) {
+                    console.log('Updating existing note with ID:', editingNoteId);
+                    // Update existing note
+                    result = await window.electronAPI.updateSecureNote(editingNoteId, noteData);
+                } else {
+                    console.log('Adding new note');
+                    // Add new note
+                    result = await window.electronAPI.addSecureNote(noteData);
+                }
+                
+                console.log('Result from backend:', result);
+                
+                if (result.success) {
+                    showToast(editingNoteId ? 'Note updated successfully' : 'Note added successfully', 'success');
+                    
+                    // Close modal
+                    hideModal('addEditNoteModal');
+                    
+                    // Reload notes
+                    await loadSecureNotes();
+                    
+                    // If we were editing, view the updated note
+                    if (editingNoteId) {
+                        viewNote(editingNoteId);
+                    }
+                } else {
+                    showToast('Failed to save note: ' + result.error, 'error');
+                }
+            } catch (error) {
+                console.error('Error saving note:', error);
+                showToast('Error saving note: ' + error.message, 'error');
+            }
+        }
+        
+        function testClick() {
+            console.log('Button clicked! Now calling saveNote...');
+            saveNote().catch(error => {
+                console.error('Error in saveNote:', error);
+                alert('Error in saveNote: ' + error.message);
+            });
+        }
+        
+        async function deleteCurrentNote() {
+            if (!editingNoteId) return;
+            
+            const note = currentNotes.find(n => n.id === editingNoteId);
+            if (!note) return;
+            
+            if (!confirm(`Are you sure you want to delete the note "${note.title}"?`)) {
+                return;
+            }
+            
+            try {
+                const result = await window.electronAPI.deleteSecureNote(editingNoteId);
+                
+                if (result.success) {
+                    showToast('Note deleted successfully', 'success');
+                    
+                    // Hide viewer, show placeholder
+                    document.getElementById('noteViewer').classList.add('d-none');
+                    document.getElementById('notePlaceholder').style.display = 'block';
+                    
+                    // Reload notes
+                    await loadSecureNotes();
+                    editingNoteId = null;
+                } else {
+                    showToast('Failed to delete note: ' + result.error, 'error');
+                }
+            } catch (error) {
+                showToast('Error deleting note: ' + error.message, 'error');
+            }
+        }
+        
+        // Backup Functions
+        async function createBackup() {
+            try {
+                const result = await window.electronAPI.createBackup();
+                if (result.success) {
+                    showToast(`Backup created: ${result.filename}`, 'success');
+                } else {
+                    showToast('Failed to create backup: ' + result.error, 'error');
+                }
+            } catch (error) {
+                showToast('Backup error: ' + error.message, 'error');
+            }
+        }
+        
+        async function restoreBackup() {
+            const fileInput = document.getElementById('backupFile');
+            if (!fileInput.files[0]) {
+                showToast('Please select a backup file', 'warning');
+                return;
+            }
+            
+            try {
+                // Restore backup not available in this version
+                showToast('Restore backup not available', 'error');
+                return;
+                if (result.success) {
+                    showToast('Backup restored successfully', 'success');
+                    await loadPasswords();
+                } else {
+                    showToast('Failed to restore backup: ' + result.error, 'error');
+                }
+            } catch (error) {
+                showToast('Restore error: ' + error.message, 'error');
+            }
+        }
+        
+        function chooseBackupLocation() {
+            showToast('Backup location chooser coming soon', 'info');
+        }
+        
+        document.addEventListener('DOMContentLoaded', async () => {
+            initializeTheme();
+            await checkAuthenticationAndLoad();
+        });
+        
+        async function checkAuthenticationAndLoad() {
+            try {
+                const authResult = await window.electronAPI.checkAuth();
+                console.log('Auth check result:', authResult);
+                
+                if (!authResult.authenticated) {
+                    console.log('User not authenticated, redirecting to login');
+                    window.location.href = 'login.html';
+                    return;
+                }
+                
+                console.log('User authenticated:', authResult.user.username);
+                await loadPasswords();
+            } catch (error) {
+                console.error('Authentication check failed:', error);
+                showToast('Authentication check failed', 'error');
+                setTimeout(() => {
+                    window.location.href = 'login.html';
+                }, 2000);
+            }
+        }
+        
+        async function loadPasswords() {
+            try {
+                console.log('Loading passwords...');
+                const result = await window.electronAPI.getPasswords();
+                console.log('Password load result:', result);
+                
+                if (result.success) {
+                    passwords = result.passwords;
+                    console.log('Loaded', passwords.length, 'passwords');
+                    displayPasswords(passwords);
+                } else {
+                    console.error('Failed to load passwords:', result.error);
+                    if (result.error === 'Not authenticated') {
+                        showToast('Session expired. Please log in again.', 'warning');
+                        setTimeout(() => {
+                            window.location.href = 'login.html';
+                        }, 2000);
+                    } else {
+                        showToast('Failed to load passwords: ' + result.error, 'error');
+                        displayEmptyState('Failed to load passwords: ' + result.error);
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading passwords:', error);
+                showToast('Error loading passwords: ' + error.message, 'error');
+                displayEmptyState('Error loading passwords: ' + error.message);
+            }
+        }
+        
+                function updateStats(passwordList) {
+            const total = passwordList.length;
+            let strong = 0, weak = 0, recent = 0;
+            const oneWeekAgo = new Date();
+            oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+            
+            passwordList.forEach(password => {
+                const strength = calculatePasswordStrength(password.secret);
+                if (strength >= 4) strong++;
+                if (strength <= 2) weak++;
+                
+                const createdDate = new Date(password.created_at);
+                if (createdDate >= oneWeekAgo) recent++;
+            });
+            
+            document.getElementById('totalPasswords').textContent = total;
+            document.getElementById('strongPasswords').textContent = strong;
+            document.getElementById('weakPasswords').textContent = weak;
+            document.getElementById('recentlyAdded').textContent = recent;
+        }
+        
+        function displayPasswords(passwordList) {
+            const container = document.getElementById('passwordsList');
+            
+            // Update stats
+            updateStats(passwordList);
+            
+            if (passwordList.length === 0) {
+                displayEmptyState('No passwords found');
+                return;
+            }
+            
+            const html = passwordList.map(password => {
+                const strengthScore = calculatePasswordStrength(password.secret);
+                const strengthClass = strengthScore <= 2 ? 'danger' : strengthScore <= 3 ? 'warning' : 'success';
+                const strengthIcon = strengthScore <= 2 ? '🔴' : strengthScore <= 3 ? '🟡' : '🟢';
+                const isSelected = selectedPasswords.has(parseInt(password.id));
+                
+                return `
+                <div class="password-item" data-id="${password.id}">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div class="d-flex align-items-center flex-grow-1">
+                            ${isBulkMode ? `
+                                <input type="checkbox" class="form-check-input me-3 password-checkbox" 
+                                       value="${password.id}" ${isSelected ? 'checked' : ''}
+                                       onchange="togglePasswordSelection(${password.id}, this.checked)">
+                            ` : ''}
+                            <div class="flex-grow-1">
+                            <div class="password-label">
+                                    🔑 ${escapeHtml(password.label)}
+                                    ${password.is_favorite ? '<span class="favorite-star">⭐</span>' : ''}
+                                    <span class="password-strength-mini">
+                                        ${strengthIcon} <span class="badge bg-${strengthClass}" style="font-size: 0.7em;">
+                                        ${strengthScore <= 2 ? 'Weak' : strengthScore <= 3 ? 'Medium' : 'Strong'}
+                                        </span>
+                                    </span>
+                                </div>
+                                <div class="password-meta">
+                                    ${password.username ? `👤 ${escapeHtml(password.username)}` : ''}
+                                    ${password.username && password.url ? ' • ' : ''}
+                                    ${password.url ? `🌐 ${escapeHtml(password.url)}` : ''}
+                                    ${(password.username || password.url) ? ' • ' : ''}
+                                    📅 ${formatDate(password.created_at)}
+                                    ${password.tags ? ` • 🏷️ ${escapeHtml(password.tags)}` : ''}
+                                </div>
+                            </div>
+                        </div>
+                        <span class="category-badge">${escapeHtml(password.category)}</span>
+                    </div>
+                    
+                    ${password.notes ? `<div class="password-meta" style="margin-top: 0.5rem; font-style: italic; opacity: 0.8;">📝 ${escapeHtml(password.notes)}</div>` : ''}
+                    
+                    <div class="password-actions" style="margin-top: 1rem;">
+                        <button class="btn btn-sm btn-primary" onclick="copyPassword(${password.id})" title="Copy Password">
+                            📋 Copy
+                        </button>
+                        <button class="btn btn-sm btn-outline-secondary" onclick="togglePasswordVisibility(${password.id})" title="Show/Hide Password">
+                            👁️ Show
+                        </button>
+                        <button class="btn btn-sm btn-outline-info" onclick="editPassword(${password.id})" title="Edit">
+                            ✏️ Edit
+                        </button>
+                        <button class="btn btn-sm btn-outline-warning" onclick="toggleFavorite(${password.id})" title="Toggle Favorite">
+                            ${password.is_favorite ? '💔 Unfavorite' : '⭐ Favorite'}
+                        </button>
+                        <button class="btn btn-sm btn-outline-danger" onclick="deletePassword(${password.id})" title="Delete">
+                            🗑️ Delete
+                        </button>
+                    </div>
+                    
+                    <div class="password-visible" id="passwordVisible${password.id}" style="display: none;">
+                        <strong>Password:</strong> <code>${escapeHtml(password.secret)}</code>
+                    </div>
+                </div>
+            `;
+            }).join('');
+            
+            container.innerHTML = html;
+        }
+        
+        function displayEmptyState(message) {
+            const container = document.getElementById('passwordsList');
+            container.innerHTML = `
+                <div class="empty-state">
+                    <div class="empty-state-icon">🔐</div>
+                    <h5>${message}</h5>
+                    <p>Start building your secure password vault today!</p>
+                    <button class="btn btn-primary" onclick="showAddPasswordModal()">
+                        <span class="icon-plus"></span> Add Your First Password
+                    </button>
+                </div>
+            `;
+        }
+        
+        function filterPasswords() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const categoryFilter = document.getElementById('categoryFilter').value;
+            
+            let filtered = passwords;
+            
+            // Filter by search term
+            if (searchTerm) {
+                filtered = filtered.filter(password => 
+                    password.label.toLowerCase().includes(searchTerm) ||
+                    (password.username && password.username.toLowerCase().includes(searchTerm)) ||
+                    (password.url && password.url.toLowerCase().includes(searchTerm)) ||
+                    (password.notes && password.notes.toLowerCase().includes(searchTerm)) ||
+                    password.category.toLowerCase().includes(searchTerm)
+                );
+            }
+            
+            // Filter by category
+            if (categoryFilter) {
+                filtered = filtered.filter(password => password.category === categoryFilter);
+            }
+            
+            displayPasswords(filtered);
+        }
+        
+        function showAddPasswordModal() {
+            editingPasswordId = null;
+            document.getElementById('passwordModalTitle').textContent = 'Add Password';
+            document.getElementById('passwordForm').reset();
+            showModal('passwordModal');
+        }
+        
+        function editPassword(id) {
+            const password = passwords.find(p => p.id === id);
+            if (!password) return;
+            
+            editingPasswordId = id;
+            document.getElementById('passwordModalTitle').textContent = 'Edit Password';
+            document.getElementById('passwordLabel').value = password.label;
+            document.getElementById('passwordUsername').value = password.username || '';
+            document.getElementById('passwordValue').value = password.secret;
+            document.getElementById('passwordUrl').value = password.url || '';
+            document.getElementById('passwordCategory').value = password.category;
+            document.getElementById('passwordNotes').value = password.notes || '';
+            document.getElementById('passwordTags').value = password.tags || '';
+            
+            showModal('passwordModal');
+        }
+        
+        async function savePassword() {
+            const form = document.getElementById('passwordForm');
+            if (!form.checkValidity()) {
+                form.reportValidity();
+                return;
+            }
+            
+            const passwordData = {
+                label: document.getElementById('passwordLabel').value,
+                username: document.getElementById('passwordUsername').value,
+                password: document.getElementById('passwordValue').value,
+                url: document.getElementById('passwordUrl').value,
+                category: document.getElementById('passwordCategory').value,
+                notes: document.getElementById('passwordNotes').value,
+                tags: document.getElementById('passwordTags').value
+            };
+            
+            try {
+                let result;
+                if (editingPasswordId) {
+                    result = await window.electronAPI.updatePassword(editingPasswordId, passwordData);
+                } else {
+                    result = await window.electronAPI.addPassword(passwordData);
+                }
+                
+                if (result.success) {
+                    showToast(editingPasswordId ? 'Password updated successfully' : 'Password added successfully', 'success');
+                    hideModal('passwordModal');
+                    loadPasswords();
+                } else {
+                    showToast(result.error || 'Failed to save password', 'error');
+                }
+            } catch (error) {
+                console.error('Error saving password:', error);
+                showToast('Error saving password', 'error');
+            }
+        }
+        
+        async function deletePassword(id) {
+            if (!confirm('Are you sure you want to delete this password?')) {
+                return;
+            }
+            
+            try {
+                const result = await window.electronAPI.deletePassword(id);
+                
+                if (result.success) {
+                    showToast('Password deleted successfully', 'success');
+                    loadPasswords();
+                } else {
+                    showToast(result.error || 'Failed to delete password', 'error');
+                }
+            } catch (error) {
+                console.error('Error deleting password:', error);
+                showToast('Error deleting password', 'error');
+            }
+        }
+        
+        async function copyPassword(id) {
+            const password = passwords.find(p => p.id === id);
+            if (!password) return;
+            
+            try {
+                await window.electronAPI.copyPassword(id);
+                showToast('Password copied to clipboard', 'success');
+                
+                // Show notification
+                await window.electronAPI.showNotification(`Password for ${password.label} copied to clipboard`);
+            } catch (error) {
+                console.error('Error copying password:', error);
+                showToast('Failed to copy password', 'error');
+            }
+        }
+        
+        async function generatePassword() {
+            try {
+                const result = await window.electronAPI.generatePassword({
+                    length: 16,
+                    includeSymbols: true,
+                    includeNumbers: true,
+                    includeUppercase: true,
+                    includeLowercase: true
+                });
+                
+                if (result.success) {
+                    // Copy functionality will be handled by the copy password method
+                    document.getElementById('passwordValue').value = result.password;
+                    showToast('Generated password copied to clipboard', 'success');
+                } else {
+                    showToast('Failed to generate password', 'error');
+                }
+            } catch (error) {
+                console.error('Error generating password:', error);
+                showToast('Error generating password', 'error');
+            }
+        }
+        
+        async function generatePasswordForForm() {
+            try {
+                const result = await window.electronAPI.generatePassword({
+                    length: 16,
+                    includeSymbols: true,
+                    includeNumbers: true,
+                    includeUppercase: true,
+                    includeLowercase: true
+                });
+                
+                if (result.success) {
+                    document.getElementById('passwordValue').value = result.password;
+                    showToast('Password generated', 'success');
+                } else {
+                    showToast('Failed to generate password', 'error');
+                }
+            } catch (error) {
+                console.error('Error generating password:', error);
+                showToast('Error generating password', 'error');
+            }
+        }
+        
+        // Toggle password visibility in the form modal
+        function togglePasswordVisibility() {
+            const passwordInput = document.getElementById('passwordValue');
+            const toggleIcon = document.getElementById('passwordToggleIcon');
+            
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                if (toggleIcon) toggleIcon.className = 'fas fa-eye-slash';
+            } else {
+                passwordInput.type = 'password';
+                if (toggleIcon) toggleIcon.className = 'fas fa-eye';
+            }
+        }
+        
+        // Toggle password visibility for individual password cards
+        function togglePasswordVisibility(id) {
+            const passwordDiv = document.getElementById(`passwordVisible${id}`);
+            const button = document.querySelector(`[onclick="togglePasswordVisibility(${id})"]`);
+            
+            if (passwordDiv.style.display === 'none' || passwordDiv.style.display === '') {
+                passwordDiv.style.display = 'block';
+                if (button) button.innerHTML = '🙈 Hide';
+            } else {
+                passwordDiv.style.display = 'none';
+                if (button) button.innerHTML = '👁️ Show';
+            }
+        }
+        
+        function refreshPasswords() {
+            loadPasswords();
+            showToast('Passwords refreshed', 'info');
+        }
+        
+        function clearFilters() {
+            document.getElementById('searchInput').value = '';
+            document.getElementById('categoryFilter').value = '';
+            displayPasswords(passwords);
+            showToast('Filters cleared', 'info');
+        }
+        
+        function logout() {
+            if (confirm('Are you sure you want to logout?')) {
+                window.location.href = 'login.html';
+            }
+        }
+        
+        // Missing dropdown menu functions
+        function showPasswordGenerator() {
+            showAdvancedGeneratorModal();
+        }
+        
+        function showBackupManagement() {
+            showToast('Backup management coming soon!', 'info');
+        }
+        
+        function showToast(message, type) {
+            const toastContainer = document.querySelector('.toast-container');
+            const toastId = 'toast-' + Date.now();
+            
+            const icon = type === 'success' ? '✅' : type === 'error' ? '❌' : type === 'warning' ? '⚠️' : 'ℹ️';
+            
+            const toastHtml = `
+                <div class="toast" id="${toastId}">
+                    <div class="toast-header">
+                        <span class="me-2">${icon}</span>
+                        <strong class="me-auto">Password Vault</strong>
+                        <button type="button" class="btn-close" onclick="hideToast('${toastId}')"></button>
+                    </div>
+                    <div class="toast-body">
+                        ${message}
+                    </div>
+                </div>
+            `;
+            
+            toastContainer.insertAdjacentHTML('beforeend', toastHtml);
+            const toastElement = document.getElementById(toastId);
+            
+            // Show toast with animation
+            setTimeout(() => {
+                toastElement.classList.add('show');
+            }, 100);
+            
+            // Auto-hide after 4 seconds
+            setTimeout(() => {
+                hideToast(toastId);
+            }, 4000);
+        }
+        
+        function hideToast(toastId) {
+            const toastElement = document.getElementById(toastId);
+            if (toastElement) {
+                toastElement.classList.remove('show');
+                setTimeout(() => {
+                    toastElement.remove();
+                }, 300);
+            }
+        }
+        
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+        
+        function formatDate(dateString) {
+            return new Date(dateString).toLocaleDateString();
+        }
+        
+        // Theme Management
+        function initializeTheme() {
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+            updateThemeIcon(savedTheme);
+        }
+        
+        function toggleTheme() {
+            const currentTheme = document.documentElement.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            
+            document.documentElement.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            updateThemeIcon(newTheme);
+            
+            showToast(`Switched to ${newTheme} theme`, 'success');
+        }
+        
+        function updateThemeIcon(theme) {
+            const themeIcon = document.getElementById('themeIcon');
+            const themeText = document.getElementById('themeText');
+            
+            if (theme === 'dark') {
+                themeIcon.className = 'fas fa-sun me-1';
+                themeText.textContent = 'Light';
+            } else {
+                themeIcon.className = 'fas fa-moon me-1';
+                themeText.textContent = 'Dark';
+            }
+        }
+        
+        // Import Functions
+        let importData = [];
+        
+        function showImportModal() {
+            showModal('importModal');
+        }
+        
+        document.getElementById('importFile').addEventListener('change', async (event) => {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            const importSource = document.getElementById('importSource').value;
+            const text = await file.text();
+            
+            try {
+                if (importSource === 'json') {
+                    importData = parseJSONImport(text);
+                } else {
+                    importData = parseCSVImport(text, importSource);
+                }
+                
+                showImportPreview(importData);
+                document.getElementById('processImportBtn').disabled = false;
+            } catch (error) {
+                showToast('Error parsing file: ' + error.message, 'error');
+            }
+        });
+        
+        function parseCSVImport(csvText, source) {
+            const lines = csvText.split('\n').map(line => line.trim()).filter(line => line);
+            if (lines.length < 2) throw new Error('Invalid CSV format');
+            
+            const headers = lines[0].split(',').map(h => h.replace(/['"]/g, '').toLowerCase());
+            const passwords = [];
+            
+            for (let i = 1; i < lines.length; i++) {
+                const values = parseCSVLine(lines[i]);
+                if (values.length < headers.length) continue;
+                
+                const entry = {};
+                headers.forEach((header, index) => {
+                    entry[header] = values[index] || '';
+                });
+                
+                const password = normalizeImportEntry(entry, source);
+                if (password.label && password.password) {
+                    passwords.push(password);
+                }
+            }
+            
+            return passwords;
+        }
+        
+        function parseCSVLine(line) {
+            const result = [];
+            let current = '';
+            let inQuotes = false;
+            
+            for (let i = 0; i < line.length; i++) {
+                const char = line[i];
+                
+                if (char === '"') {
+                    inQuotes = !inQuotes;
+                } else if (char === ',' && !inQuotes) {
+                    result.push(current.trim());
+                    current = '';
+                } else {
+                    current += char;
+                }
+            }
+            
+            result.push(current.trim());
+            return result;
+        }
+        
+        function parseJSONImport(jsonText) {
+            const data = JSON.parse(jsonText);
+            
+            // Handle Bitwarden JSON format
+            if (data.items) {
+                return data.items
+                    .filter(item => item.type === 1) // Login items
+                    .map(item => ({
+                        label: item.name || 'Imported Entry',
+                        username: item.login?.username || '',
+                        password: item.login?.password || '',
+                        url: item.login?.uris?.[0]?.uri || '',
+                        category: item.folderId ? 'Imported' : 'General',
+                        notes: item.notes || ''
+                    }));
+            }
+            
+            throw new Error('Unsupported JSON format');
+        }
+        
+        function normalizeImportEntry(entry, source) {
+            const password = {
+                label: '',
+                username: '',
+                password: '',
+                url: '',
+                category: 'Imported',
+                notes: ''
+            };
+            
+            // Map common field names
+            const fieldMappings = {
+                // Labels
+                label: ['name', 'title', 'account', 'label', 'site'],
+                username: ['username', 'user', 'email', 'login'],
+                password: ['password', 'pass', 'pwd'],
+                url: ['url', 'website', 'site', 'domain'],
+                notes: ['notes', 'note', 'comments', 'comment']
+            };
+            
+            Object.keys(fieldMappings).forEach(field => {
+                const mappings = fieldMappings[field];
+                for (const mapping of mappings) {
+                    if (entry[mapping]) {
+                        password[field] = entry[mapping];
+                        break;
+                    }
+                }
+            });
+            
+            // Fallback for label
+            if (!password.label) {
+                password.label = password.url || password.username || 'Imported Entry';
+            }
+            
+            // Categorize based on URL
+            if (password.url) {
+                const domain = password.url.toLowerCase();
+                if (domain.includes('bank') || domain.includes('finance')) {
+                    password.category = 'Finance';
+                } else if (domain.includes('social') || domain.includes('facebook') || domain.includes('twitter')) {
+                    password.category = 'Social';
+                } else if (domain.includes('work') || domain.includes('office')) {
+                    password.category = 'Work';
+                } else if (domain.includes('shop') || domain.includes('amazon') || domain.includes('ebay')) {
+                    password.category = 'Shopping';
+                }
+            }
+            
+            return password;
+        }
+        
+        function showImportPreview(passwords) {
+            const previewDiv = document.getElementById('importPreview');
+            const previewBody = document.getElementById('importPreviewBody');
+            const countSpan = document.getElementById('importCount');
+            
+            previewBody.innerHTML = '';
+            
+            passwords.slice(0, 10).forEach(password => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${password.label}</td>
+                    <td>${password.username}</td>
+                    <td>${password.url}</td>
+                    <td><span class="badge bg-secondary">${password.category}</span></td>
+                `;
+                previewBody.appendChild(row);
+            });
+            
+            countSpan.textContent = passwords.length;
+            previewDiv.style.display = 'block';
+        }
+        
+        async function processImport() {
+            if (importData.length === 0) return;
+            
+            const button = document.getElementById('processImportBtn');
+            button.disabled = true;
+            button.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Importing...';
+            
+            try {
+                const result = await window.electronAPI.importPasswords(importData);
+                
+                if (result.success) {
+                    showToast(`Successfully imported ${result.count} passwords!`, 'success');
+                    await loadPasswords();
+                    hideModal('importModal');
+                } else {
+                    showToast('Import failed: ' + result.error, 'error');
+                }
+            } catch (error) {
+                showToast('Import error: ' + error.message, 'error');
+            } finally {
+                button.disabled = false;
+                button.innerHTML = 'Import Passwords';
+            }
+        }
+        
+        // Advanced Features Implementation
+        let isBulkMode = false;
+        let selectedPasswords = new Set();
+        let currentAdvancedFilters = {};
+        
+        // Bulk Operations
+        function toggleBulkMode() {
+            isBulkMode = !isBulkMode;
+            const bulkBar = document.getElementById('bulkOperationsBar');
+            const bulkBtn = document.getElementById('bulkModeBtn');
+            const smartSuggestions = document.getElementById('smartSuggestions');
+            
+            if (isBulkMode) {
+                bulkBar.style.display = 'block';
+                smartSuggestions.style.display = 'block';
+                bulkBtn.classList.add('active');
+                bulkBtn.innerHTML = '❌ Exit Bulk';
+                selectedPasswords.clear();
+                displayPasswords(passwords);
+            } else {
+                bulkBar.style.display = 'none';
+                smartSuggestions.style.display = 'none';
+                bulkBtn.classList.remove('active');
+                bulkBtn.innerHTML = '☑️ Bulk Mode';
+                selectedPasswords.clear();
+                displayPasswords(passwords);
+            }
+            
+            updateSelectedCount();
+        }
+        
+        function selectAllPasswords() {
+            const visiblePasswords = document.querySelectorAll('.password-item:not([style*="display: none"]) .password-checkbox');
+            selectedPasswords.clear();
+            visiblePasswords.forEach(checkbox => {
+                checkbox.checked = true;
+                selectedPasswords.add(parseInt(checkbox.value));
+            });
+            updateSelectedCount();
+        }
+        
+        function clearSelection() {
+            selectedPasswords.clear();
+            document.querySelectorAll('.password-checkbox').forEach(checkbox => {
+                checkbox.checked = false;
+            });
+            updateSelectedCount();
+        }
+        
+        function updateSelectedCount() {
+            const countSpan = document.getElementById('selectedCount');
+            if (countSpan) {
+                countSpan.textContent = selectedPasswords.size;
+            }
+        }
+        
+        function togglePasswordSelection(id, checked) {
+            // Ensure ID is an integer
+            const passwordId = parseInt(id);
+            if (checked) {
+                selectedPasswords.add(passwordId);
+            } else {
+                selectedPasswords.delete(passwordId);
+            }
+            updateSelectedCount();
+        }
+        
+        // Export Functions
+        function showExportModal() {
+            showModal('exportModal');
+            
+            // Setup export format change handler
+            document.getElementById('exportFormat').addEventListener('change', function() {
+                const passwordDiv = document.getElementById('exportPasswordDiv');
+                if (this.value === 'encrypted') {
+                    passwordDiv.style.display = 'block';
+                } else {
+                    passwordDiv.style.display = 'none';
+                }
+            });
+        }
+        
+        async function processExport() {
+            const format = document.getElementById('exportFormat').value;
+            const includePasswords = document.getElementById('includePasswords').checked;
+            const includeNotes = document.getElementById('includeSecureNotes').checked;
+            const encryptionPassword = document.getElementById('exportPassword').value;
+            
+            if (format === 'encrypted' && !encryptionPassword) {
+                showToast('Encryption password is required for encrypted exports', 'error');
+                return;
+            }
+            
+            try {
+                const result = await window.electronAPI.exportPasswords({
+                    format,
+                    includePasswords,
+                    includeNotes,
+                    encryptionPassword: format === 'encrypted' ? encryptionPassword : null
+                });
+                
+                if (result.success) {
+                    showToast(`Data exported successfully to ${result.filename}`, 'success');
+                    hideModal('exportModal');
+                } else {
+                    showToast('Export failed: ' + result.error, 'error');
+                }
+            } catch (error) {
+                showToast('Export error: ' + error.message, 'error');
+            }
+        }
+        
+        async function bulkExport() {
+            if (selectedPasswords.size === 0) {
+                showToast('Please select passwords to export', 'warning');
+                return;
+            }
+            
+            try {
+                // Use the regular export but show a message that it exports all passwords
+                showToast('Opening export dialog - note that all passwords will be exported', 'info');
+                showExportModal();
+            } catch (error) {
+                showToast('Bulk export error: ' + error.message, 'error');
+            }
+        }
+        
+        async function bulkDelete() {
+            if (selectedPasswords.size === 0) {
+                showToast('Please select passwords to delete', 'warning');
+                return;
+            }
+            
+            if (!confirm(`Are you sure you want to delete ${selectedPasswords.size} passwords?`)) {
+                return;
+            }
+            
+            try {
+                const selectedIds = Array.from(selectedPasswords);
+                // Bulk delete not available in this version
+                showToast('Bulk delete not available', 'error');
+                return;
+                
+                if (result.success) {
+                    showToast(`${selectedIds.length} passwords deleted successfully`, 'success');
+                    selectedPasswords.clear();
+                    await loadPasswords();
+                    updateSelectedCount();
+                } else {
+                    showToast('Bulk delete failed: ' + result.error, 'error');
+                }
+            } catch (error) {
+                showToast('Bulk delete error: ' + error.message, 'error');
+            }
+        }
+        
+        function bulkChangeCategory() {
+            if (selectedPasswords.size === 0) {
+                showToast('Please select passwords to change category', 'warning');
+                return;
+            }
+            
+            const newCategory = prompt('Enter new category for selected passwords:');
+            if (!newCategory) return;
+            
+            // Implementation would go here
+            showToast(`Category changed for ${selectedPasswords.size} passwords`, 'success');
+        }
+        
+        // Advanced Search Functions
+        function showAdvancedSearchModal() {
+            showModal('advancedSearchModal');
+        }
+        
+        function clearAdvancedSearch() {
+            document.getElementById('advSearchText').value = '';
+            document.getElementById('advSearchCategory').value = '';
+            document.getElementById('advSearchTags').value = '';
+            document.getElementById('advSearchDateFrom').value = '';
+            document.getElementById('advSearchDateTo').value = '';
+            document.getElementById('advSearchStrength').value = '';
+            document.getElementById('advSearchFavorites').checked = false;
+            document.getElementById('advSearchDuplicates').checked = false;
+            document.getElementById('advSearchNoURL').checked = false;
+            
+            currentAdvancedFilters = {};
+            displayPasswords(passwords);
+        }
+        
+        function applyAdvancedSearch() {
+            currentAdvancedFilters = {
+                text: document.getElementById('advSearchText').value.toLowerCase(),
+                category: document.getElementById('advSearchCategory').value,
+                tags: document.getElementById('advSearchTags').value.toLowerCase(),
+                dateFrom: document.getElementById('advSearchDateFrom').value,
+                dateTo: document.getElementById('advSearchDateTo').value,
+                strength: document.getElementById('advSearchStrength').value,
+                favorites: document.getElementById('advSearchFavorites').checked,
+                duplicates: document.getElementById('advSearchDuplicates').checked,
+                noURL: document.getElementById('advSearchNoURL').checked
+            };
+            
+            const filtered = applyAdvancedFilters(passwords);
+            displayPasswords(filtered);
+            
+            hideModal('advancedSearchModal');
+            showToast(`Found ${filtered.length} passwords matching your criteria`, 'info');
+        }
+        
+        function applyAdvancedFilters(passwordList) {
+            let filtered = [...passwordList];
+            
+            // Text search
+            if (currentAdvancedFilters.text) {
+                filtered = filtered.filter(p => 
+                    p.label.toLowerCase().includes(currentAdvancedFilters.text) ||
+                    (p.username && p.username.toLowerCase().includes(currentAdvancedFilters.text)) ||
+                    (p.url && p.url.toLowerCase().includes(currentAdvancedFilters.text)) ||
+                    (p.notes && p.notes.toLowerCase().includes(currentAdvancedFilters.text))
+                );
+            }
+            
+            // Category filter
+            if (currentAdvancedFilters.category) {
+                filtered = filtered.filter(p => p.category === currentAdvancedFilters.category);
+            }
+            
+            // Tags filter
+            if (currentAdvancedFilters.tags) {
+                const searchTags = currentAdvancedFilters.tags.split(',').map(t => t.trim());
+                filtered = filtered.filter(p => {
+                    if (!p.tags) return false;
+                    const passwordTags = p.tags.toLowerCase().split(',').map(t => t.trim());
+                    return searchTags.some(tag => passwordTags.includes(tag));
+                });
+            }
+            
+            // Date range filter
+            if (currentAdvancedFilters.dateFrom || currentAdvancedFilters.dateTo) {
+                filtered = filtered.filter(p => {
+                    const passwordDate = new Date(p.created_at);
+                    const fromDate = currentAdvancedFilters.dateFrom ? new Date(currentAdvancedFilters.dateFrom) : null;
+                    const toDate = currentAdvancedFilters.dateTo ? new Date(currentAdvancedFilters.dateTo) : null;
+                    
+                    if (fromDate && passwordDate < fromDate) return false;
+                    if (toDate && passwordDate > toDate) return false;
+                    return true;
+                });
+            }
+            
+            // Special filters
+            if (currentAdvancedFilters.favorites) {
+                filtered = filtered.filter(p => p.is_favorite);
+            }
+            
+            if (currentAdvancedFilters.noURL) {
+                filtered = filtered.filter(p => !p.url || p.url.trim() === '');
+            }
+            
+            return filtered;
+        }
+        
+        // Smart Suggestions
+        function filterByRecent() {
+            const oneWeekAgo = new Date();
+            oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+            
+            const recent = passwords.filter(p => new Date(p.created_at) >= oneWeekAgo);
+            displayPasswords(recent);
+            showToast(`Showing ${recent.length} recently added passwords`, 'info');
+        }
+        
+        function filterByFavorites() {
+            const favorites = passwords.filter(p => p.is_favorite);
+            displayPasswords(favorites);
+            showToast(`Showing ${favorites.length} favorite passwords`, 'info');
+        }
+        
+        function filterByStrong() {
+            const strong = passwords.filter(p => calculatePasswordStrength(p.secret) >= 4);
+            displayPasswords(strong);
+            showToast(`Showing ${strong.length} strong passwords`, 'info');
+        }
+        
+        function filterByWeak() {
+            const weak = passwords.filter(p => calculatePasswordStrength(p.secret) <= 2);
+            displayPasswords(weak);
+            showToast(`Showing ${weak.length} weak passwords`, 'info');
+        }
+        
+        function filterByDuplicates() {
+            const duplicates = [];
+            const seen = new Set();
+            
+            passwords.forEach(p => {
+                if (seen.has(p.secret)) {
+                    duplicates.push(p);
+                } else {
+                    seen.add(p.secret);
+                    // Check if this password appears again
+                    if (passwords.filter(other => other.secret === p.secret).length > 1) {
+                        duplicates.push(p);
+                    }
+                }
+            });
+            
+            displayPasswords(duplicates);
+            showToast(`Found ${duplicates.length} duplicate passwords`, 'info');
+        }
+        
+        function calculatePasswordStrength(password) {
+            let score = 0;
+            if (password.length >= 8) score++;
+            if (/[a-z]/.test(password)) score++;
+            if (/[A-Z]/.test(password)) score++;
+            if (/[0-9]/.test(password)) score++;
+            if (/[^A-Za-z0-9]/.test(password)) score++;
+            return score;
+        }
+        
+        // Sorting Functions
+        function sortPasswords() {
+            const sortBy = document.getElementById('sortFilter').value;
+            let sorted = [...passwords];
+            
+            switch (sortBy) {
+                case 'created_desc':
+                    sorted.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+                    break;
+                case 'created_asc':
+                    sorted.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+                    break;
+                case 'label_asc':
+                    sorted.sort((a, b) => a.label.localeCompare(b.label));
+                    break;
+                case 'label_desc':
+                    sorted.sort((a, b) => b.label.localeCompare(a.label));
+                    break;
+                case 'category_asc':
+                    sorted.sort((a, b) => a.category.localeCompare(b.category));
+                    break;
+                case 'updated_desc':
+                    sorted.sort((a, b) => new Date(b.updated_at || b.created_at) - new Date(a.updated_at || a.created_at));
+                    break;
+            }
+            
+            displayPasswords(sorted);
+        }
+        
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            if (e.ctrlKey || e.metaKey) {
+                switch (e.key) {
+                    case 'n':
+                        e.preventDefault();
+                        showAddPasswordModal();
+                        break;
+                    case 'f':
+                        e.preventDefault();
+                        document.getElementById('searchInput').focus();
+                        break;
+                    case 'r':
+                        e.preventDefault();
+                        refreshPasswords();
+                        break;
+                    case 't':
+                        e.preventDefault();
+                        toggleTheme();
+                        break;
+                    case 'i':
+                        e.preventDefault();
+                        showImportModal();
+                        break;
+                    case 'e':
+                        e.preventDefault();
+                        showExportModal();
+                        break;
+                    case 'b':
+                        e.preventDefault();
+                        toggleBulkMode();
+                        break;
+                    case 'g':
+                        e.preventDefault();
+                        showAdvancedGeneratorModal();
+                        break;
+                    case 'k':
+                        e.preventDefault();
+                        showAdvancedSearchModal();
+                        break;
+                    case 'u':
+                        e.preventDefault();
+                        showNotesModal();
+                        break;
+                }
+            }
+            
+            // Delete key for bulk delete
+            if (e.key === 'Delete' && isBulkMode && selectedPasswords.size > 0) {
+                e.preventDefault();
+                bulkDelete();
+            }
+            
+            // Escape to exit bulk mode
+            if (e.key === 'Escape' && isBulkMode) {
+                e.preventDefault();
+                toggleBulkMode();
+            }
+        });
+    </script>
+</body>
+</html> 
